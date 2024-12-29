@@ -1,0 +1,57 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>images/musical-note.png</file>
+        <file>images/next.png</file>
+        <file>images/pause.png</file>
+        <file>images/play.png</file>
+        <file>images/volume.png</file>
+        <file>images/windowTitle_icon.png</file>
+        <file>images/mute.png</file>
+        <file>images/remove.png</file>
+        <file>images/trash.png</file>
+        <file>images/like.png</file>
+        <file>images/unlike.png</file>
+        <file>images/more.png</file>
+        <file>images/checked.png</file>
+        <file>images/unchecked.png</file>
+        <file>images/coment.png</file>
+        <file>images/balance.png</file>
+        <file>images/lyric.png</file>
+        <file>images/newCategory.png</file>
+        <file>images/history.png</file>
+        <file>images/download.png</file>
+        <file>images/playlist.png</file>
+        <file>images/loopSequential.png</file>
+        <file>images/loopSingle.png</file>
+        <file>images/sequential.png</file>
+        <file>images/random.png</file>
+        <file>images/previous.png</file>
+        <file>images/add_to_new.png</file>
+        <file>images/play_one.png</file>
+        <file>images/play_MV.png</file>
+        <file>images/copy.png</file>
+        <file>images/play_next.png</file>
+        <file>images/play_similar.png</file>
+        <file>images/share.png</file>
+        <file>images/next_lyric.png.png</file>
+        <file>images/play_lyric.png</file>
+        <file>images/previous_lyric.png</file>
+        <file>images/close_lyric.png</file>
+        <file>images/pause_lyric.png</file>
+        <file>images/import.png</file>
+        <file>images/close.png</file>
+        <file>images/maximize.png</file>
+        <file>images/minimize.png</file>
+        <file>images/add.png</file>
+        <file>images/batchprocess.png</file>
+        <file>images/lyric_hide.png</file>
+        <file>images/partially_checked.png</file>
+    </qresource>
+    <qresource prefix="/cover">
+        <file>images/panda-listening-music.jpg</file>
+        <file>images/pandamusic_label.png</file>
+        <file>images/mediaDisk.png</file>
+        <file>images/pole.png</file>
+        <file>images/mediaDiskBackgound.png</file>
+    </qresource>
+</RCC>
