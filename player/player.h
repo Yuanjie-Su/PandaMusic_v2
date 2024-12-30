@@ -29,6 +29,7 @@ public:
     PlayBackMode playBackMode() { return m_playBackMode; }
 
     void addSong(int);
+    void addSong(const QVector<int> &);
     void initPlaylist(const QVector<int> &);
     void removeSong(int);
     bool isPlaying();

@@ -59,6 +59,8 @@ PlayListWidget* PlayListWidget::instance(QWidget *parent)
 
 void PlayListWidget::do_currentRowChanged(int row)
 {
+    emit exitBatchProcess();
+
     if (row == -1) {
         m_currentKind = PlaylistKind::Custom;
         return;

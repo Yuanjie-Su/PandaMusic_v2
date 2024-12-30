@@ -24,6 +24,7 @@ public:
 
     bool insertNameIntoCategory(const QString &name, const QString &cover);
     bool insertSongIntoCategory(const QString &categoryName, int songId);
+    void insertSongIntoCategory(const QString &categoryName, QVector<int> songIdVector);
     bool insertSongIntoHistory(int songId);
     void insertSongIntoHistory(const QVector<int> &songIdVector);
     bool insertSongIntoPlaylist(int songId);

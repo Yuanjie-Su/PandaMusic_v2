@@ -43,6 +43,7 @@ public slots:
     void on_btnBatchPlay_clicked();
     void do_listSelected(const QString &listName);
     void do_favoriteChanged(int songId, int favorite);
+    void do_exitBatchProcess();
 
 private slots:
     void on_btnPlay_clicked();
@@ -72,6 +73,8 @@ private slots:
     void on_btnImport_clicked();
 
     void on_btnExitBatch_clicked();
+
+    void on_btnBatchAddTo_clicked();
 
 private:
     Ui::MainWindow *ui;

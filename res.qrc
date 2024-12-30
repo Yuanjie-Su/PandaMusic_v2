@@ -46,6 +46,7 @@
         <file>images/batchprocess.png</file>
         <file>images/lyric_hide.png</file>
         <file>images/partially_checked.png</file>
+        <file>images/addToButton.png</file>
     </qresource>
     <qresource prefix="/cover">
         <file>images/panda-listening-music.jpg</file>

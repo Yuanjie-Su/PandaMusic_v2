@@ -19,7 +19,9 @@ public:
     PlaylistKind currentPlaylistKind() const { return m_currentKind; }
 
 signals:
-    emit void listSelected(const QString &listName);
+    void listSelected(const QString &listName);
+    void exitBatchProcess();
+
 
 private slots:
     void do_currentRowChanged(int row);

@@ -31,6 +31,16 @@ void Player::addSong(int songId)
     m_songIdVector.append(songId);
 }
 
+void Player::addSong(const QVector<int> &songIdVector)
+{
+    for (int songId : songIdVector) {
+        if (!m_songIdVector.contains(songId)) {
+            m_songIdVector.append(songId);
+            DB->insertSongIntoPlaylist(songId);
+        }
+    }
+}
+
 void Player::initPlaylist(const QVector<int> &songIdVector)
 {
     m_songIdVector = songIdVector;

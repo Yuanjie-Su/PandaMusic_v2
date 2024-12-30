@@ -337,6 +337,29 @@ padding-right:20px;
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="btnBatchAddTo">
+              <property name="styleSheet">
+               <string notr="true">QPushButton#btnBatchAddTo {
+background-color: rgb(230,230,230);
+border: none;
+border-radius:16px;
+
+ padding-top: 8px;
+padding-bottom:8px;
+padding-left: 20px;
+padding-right:20px;
+}</string>
+              </property>
+              <property name="text">
+               <string>添加到</string>
+              </property>
+              <property name="icon">
+               <iconset resource="res.qrc">
+                <normaloff>:/icons/images/addToButton.png</normaloff>:/icons/images/addToButton.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="btnRemoveBatch">
               <property name="styleSheet">
                <string notr="true">QPushButton {

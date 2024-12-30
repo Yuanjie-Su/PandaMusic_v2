@@ -55,10 +55,13 @@ SongTableView::SongTableView(QWidget *parent)
         "}");
     // 垂直表头
     verticalHeader()->setDefaultSectionSize(50);
+    // 关闭自动换行
+    setWordWrap(false);
 
     // 设置数据模型
     SongTableModel::instance(this);
     SONG_TABLEMODEL->setEditStrategy(QSqlTableModel::OnFieldChange);
+    SONG_TABLEMODEL->setSort(-1, Qt::AscendingOrder);
     setModel(SONG_TABLEMODEL);
     SONG_TABLEMODEL->setTable("song");
 
@@ -116,7 +119,6 @@ SongTableView::SongTableView(QWidget *parent)
 
     connect(SONG_TABLEMODEL, &SongTableModel::checkStateChanged
             , m_header, &HeaderWithCheckbox::setCheckState);
-
 }
 
 bool SongTableView::enterBatchProcess()

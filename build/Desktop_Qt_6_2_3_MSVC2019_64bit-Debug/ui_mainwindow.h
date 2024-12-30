@@ -46,6 +46,7 @@ public:
     QPushButton *btnBatchPlay;
     QPushButton *btnBatchProcess;
     QPushButton *btnImport;
+    QPushButton *btnBatchAddTo;
     QPushButton *btnRemoveBatch;
     QSpacerItem *horizontalSpacer_6;
     QPushButton *btnExitBatch;
@@ -248,6 +249,24 @@ public:
 
         horizontalLayout_3->addWidget(btnImport);
 
+        btnBatchAddTo = new QPushButton(frameTable);
+        btnBatchAddTo->setObjectName(QString::fromUtf8("btnBatchAddTo"));
+        btnBatchAddTo->setStyleSheet(QString::fromUtf8("QPushButton#btnBatchAddTo {\n"
+"background-color: rgb(230,230,230);\n"
+"border: none;\n"
+"border-radius:16px;\n"
+"\n"
+" padding-top: 8px;\n"
+"padding-bottom:8px;\n"
+"padding-left: 20px;\n"
+"padding-right:20px;\n"
+"}"));
+        QIcon icon5;
+        icon5.addFile(QString::fromUtf8(":/icons/images/addToButton.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnBatchAddTo->setIcon(icon5);
+
+        horizontalLayout_3->addWidget(btnBatchAddTo);
+
         btnRemoveBatch = new QPushButton(frameTable);
         btnRemoveBatch->setObjectName(QString::fromUtf8("btnRemoveBatch"));
         btnRemoveBatch->setStyleSheet(QString::fromUtf8("QPushButton {\n"
@@ -260,9 +279,9 @@ public:
 "padding-left: 20px;\n"
 "padding-right:20px;\n"
 "}"));
-        QIcon icon5;
-        icon5.addFile(QString::fromUtf8(":/icons/images/trash.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnRemoveBatch->setIcon(icon5);
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8(":/icons/images/trash.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnRemoveBatch->setIcon(icon6);
 
         horizontalLayout_3->addWidget(btnRemoveBatch);
 
@@ -361,9 +380,9 @@ public:
         btnFavoriteOne->setMaximumSize(QSize(25, 25));
         btnFavoriteOne->setCursor(QCursor(Qt::PointingHandCursor));
         btnFavoriteOne->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon6;
-        icon6.addFile(QString::fromUtf8(":/icons/images/unlike.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnFavoriteOne->setIcon(icon6);
+        QIcon icon7;
+        icon7.addFile(QString::fromUtf8(":/icons/images/unlike.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnFavoriteOne->setIcon(icon7);
         btnFavoriteOne->setIconSize(QSize(24, 24));
 
         horizontalLayout_5->addWidget(btnFavoriteOne);
@@ -374,9 +393,9 @@ public:
         btnComent->setSizePolicy(sizePolicy1);
         btnComent->setMaximumSize(QSize(25, 25));
         btnComent->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon7;
-        icon7.addFile(QString::fromUtf8(":/icons/images/coment.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnComent->setIcon(icon7);
+        QIcon icon8;
+        icon8.addFile(QString::fromUtf8(":/icons/images/coment.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnComent->setIcon(icon8);
         btnComent->setIconSize(QSize(24, 24));
 
         horizontalLayout_5->addWidget(btnComent);
@@ -388,9 +407,9 @@ public:
         btnMoreOne->setMaximumSize(QSize(25, 25));
         btnMoreOne->setCursor(QCursor(Qt::PointingHandCursor));
         btnMoreOne->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon8;
-        icon8.addFile(QString::fromUtf8(":/icons/images/more.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnMoreOne->setIcon(icon8);
+        QIcon icon9;
+        icon9.addFile(QString::fromUtf8(":/icons/images/more.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnMoreOne->setIcon(icon9);
         btnMoreOne->setIconSize(QSize(20, 20));
 
         horizontalLayout_5->addWidget(btnMoreOne);
@@ -426,9 +445,9 @@ public:
         btnPlayMode->setMaximumSize(QSize(40, 40));
         btnPlayMode->setCursor(QCursor(Qt::PointingHandCursor));
         btnPlayMode->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon9;
-        icon9.addFile(QString::fromUtf8(":/icons/images/sequential.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnPlayMode->setIcon(icon9);
+        QIcon icon10;
+        icon10.addFile(QString::fromUtf8(":/icons/images/sequential.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnPlayMode->setIcon(icon10);
         btnPlayMode->setIconSize(QSize(20, 20));
 
         horizontalLayout->addWidget(btnPlayMode);
@@ -442,9 +461,9 @@ public:
         btnPrevious->setMaximumSize(QSize(40, 40));
         btnPrevious->setCursor(QCursor(Qt::PointingHandCursor));
         btnPrevious->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon10;
-        icon10.addFile(QString::fromUtf8(":/icons/images/previous.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnPrevious->setIcon(icon10);
+        QIcon icon11;
+        icon11.addFile(QString::fromUtf8(":/icons/images/previous.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnPrevious->setIcon(icon11);
         btnPrevious->setIconSize(QSize(20, 20));
 
         horizontalLayout->addWidget(btnPrevious);
@@ -458,9 +477,9 @@ public:
         btnPlay->setMaximumSize(QSize(40, 40));
         btnPlay->setCursor(QCursor(Qt::PointingHandCursor));
         btnPlay->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon11;
-        icon11.addFile(QString::fromUtf8(":/icons/images/play.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnPlay->setIcon(icon11);
+        QIcon icon12;
+        icon12.addFile(QString::fromUtf8(":/icons/images/play.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnPlay->setIcon(icon12);
         btnPlay->setIconSize(QSize(40, 40));
 
         horizontalLayout->addWidget(btnPlay);
@@ -474,9 +493,9 @@ public:
         btnNext->setMaximumSize(QSize(40, 40));
         btnNext->setCursor(QCursor(Qt::PointingHandCursor));
         btnNext->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon12;
-        icon12.addFile(QString::fromUtf8(":/icons/images/next.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnNext->setIcon(icon12);
+        QIcon icon13;
+        icon13.addFile(QString::fromUtf8(":/icons/images/next.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnNext->setIcon(icon13);
         btnNext->setIconSize(QSize(20, 20));
 
         horizontalLayout->addWidget(btnNext);
@@ -489,9 +508,9 @@ public:
         btnVolume->setMaximumSize(QSize(40, 40));
         btnVolume->setCursor(QCursor(Qt::PointingHandCursor));
         btnVolume->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon13;
-        icon13.addFile(QString::fromUtf8(":/icons/images/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnVolume->setIcon(icon13);
+        QIcon icon14;
+        icon14.addFile(QString::fromUtf8(":/icons/images/volume.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnVolume->setIcon(icon14);
         btnVolume->setIconSize(QSize(20, 20));
         btnVolume->setFlat(true);
 
@@ -582,9 +601,9 @@ public:
         btnLyric->setMaximumSize(QSize(32, 32));
         btnLyric->setCursor(QCursor(Qt::PointingHandCursor));
         btnLyric->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon14;
-        icon14.addFile(QString::fromUtf8(":/icons/images/lyric.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnLyric->setIcon(icon14);
+        QIcon icon15;
+        icon15.addFile(QString::fromUtf8(":/icons/images/lyric.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnLyric->setIcon(icon15);
         btnLyric->setIconSize(QSize(24, 24));
 
         horizontalLayout_7->addWidget(btnLyric);
@@ -597,9 +616,9 @@ public:
         btnBanlance->setMaximumSize(QSize(32, 32));
         btnBanlance->setCursor(QCursor(Qt::PointingHandCursor));
         btnBanlance->setStyleSheet(QString::fromUtf8("border: none;"));
-        QIcon icon15;
-        icon15.addFile(QString::fromUtf8(":/icons/images/balance.png"), QSize(), QIcon::Normal, QIcon::Off);
-        btnBanlance->setIcon(icon15);
+        QIcon icon16;
+        icon16.addFile(QString::fromUtf8(":/icons/images/balance.png"), QSize(), QIcon::Normal, QIcon::Off);
+        btnBanlance->setIcon(icon16);
         btnBanlance->setIconSize(QSize(24, 24));
 
         horizontalLayout_7->addWidget(btnBanlance);
@@ -642,6 +661,7 @@ public:
 #endif // QT_CONFIG(tooltip)
         btnBatchProcess->setText(QCoreApplication::translate("MainWindow", "\346\211\271\351\207\217\346\223\215\344\275\234", nullptr));
         btnImport->setText(QCoreApplication::translate("MainWindow", "\345\257\274\345\205\245\346\255\214\346\233\262", nullptr));
+        btnBatchAddTo->setText(QCoreApplication::translate("MainWindow", "\346\267\273\345\212\240\345\210\260", nullptr));
         btnRemoveBatch->setText(QCoreApplication::translate("MainWindow", "\345\210\240\351\231\244", nullptr));
 #if QT_CONFIG(tooltip)
         btnExitBatch->setToolTip(QCoreApplication::translate("MainWindow", "\351\200\200\345\207\272\346\211\271\351\207\217\346\223\215\344\275\234", nullptr));

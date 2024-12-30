@@ -2,6 +2,7 @@
 #include "utils/imageutils.h"
 #include "database/database.h"
 #include "player/player.h"
+#include "playlistwidget.h"
 
 #include <QBrush>
 
@@ -78,6 +79,19 @@ void SongTableModel::removeSelected(const QString &categoryName, PlaylistKind li
     select();
 }
 
+QVector<int> SongTableModel::selectedSongIds()
+{
+    QVector<int> songIdVector;
+    int rowCount = this->rowCount();
+    for (int i = 0; i < rowCount; ++i) {
+        if (checkStateMap[i] == Qt::Checked) {
+            int songId = QSqlTableModel::data(this->index(i, TableColumns::IdColumn), Qt::DisplayRole).toInt();
+            songIdVector.append(songId);
+        }
+    }
+    return songIdVector;
+}
+
 void SongTableModel::resetCheckState()
 {
     checkStateMap.fill(Qt::Unchecked);
@@ -88,12 +102,6 @@ QVariant SongTableModel::data(const QModelIndex &index, int role) const
     if (role == Qt::BackgroundRole)
     {
         return QBrush(m_rowBackground[index.row()]);
-    }
-
-    // 针对 checkState 列的处理
-    if (index.column() == TableColumns::CheckStateColumn && role == Qt::CheckStateRole)
-    {
-        return checkStateMap[index.row()];
     }
 
     // 缓存原始数据，减少多次调用
@@ -127,6 +135,12 @@ QVariant SongTableModel::data(const QModelIndex &index, int role) const
     {
         int duration = baseData.toInt();
         return QString("%1:%2").arg(duration / 60, 2, 10, QLatin1Char('0')).arg(duration % 60, 2, 10, QLatin1Char('0'));
+    }
+
+    // 针对 checkState 列的处理
+    if (index.column() == TableColumns::CheckStateColumn && role == Qt::CheckStateRole)
+    {
+        return checkStateMap[index.row()];
     }
 
     return baseData;
@@ -167,6 +181,17 @@ bool SongTableModel::setData(const QModelIndex &index, const QVariant &value, in
         return true;
     }
 
+    // 检测是否是 favorite 列，并且 role 是 Qt::EditRole
+    if (column == TableColumns::FavoriteColumn
+        && role == Qt::EditRole
+        && PLAY_LISTWIDGET->currentPlaylistKind() == PlaylistKind::Favorite){
+        // 执行更新操作
+        if (QSqlTableModel::setData(index, value, role)) {
+            select();
+        }
+        return false;
+    }
+
     return QSqlTableModel::setData(index, value, role);
 }
 
@@ -183,6 +208,21 @@ Qt::ItemFlags SongTableModel::flags(const QModelIndex &index) const
     }
 
     return flags | Qt::ItemIsEditable;
+}
+
+QString SongTableModel::selectStatement() const {
+    QString baseQuery = "SELECT song.* FROM song";
+
+    // 如果当前 filter 是 history 的查询
+    if (filter().contains("id IN (SELECT song_id FROM history)")) {
+        baseQuery += " JOIN history ON song.id = history.song_id";
+        baseQuery += " WHERE " + filter();
+        baseQuery += " ORDER BY history.created_at DESC";
+    } else if (!filter().isEmpty()) {
+        baseQuery += " WHERE " + filter();
+    }
+
+    return baseQuery;
 }
 
 bool SongTableModel::select() {

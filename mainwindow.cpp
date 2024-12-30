@@ -9,6 +9,7 @@
 #include "playlistwidget.h"
 #include "utils/imageutils.h"
 #include "myMenu/moremenu.h"
+#include "myMenu/batchaddtomenu.h"
 #include "trotatedlabel.h"
 
 #include <QHBoxLayout>
@@ -57,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btnImport->setVisible(false);
     ui->btnExitBatch->setVisible(false);
     ui->btnRemoveBatch->setVisible(false);
+    ui->btnBatchAddTo->setVisible(false);
 
     // 歌词界面不可见
     ui->lyricsWidget->setVisible(false);
@@ -113,6 +115,10 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::do_listSelected);
     connect(PLAY_LISTWIDGET, &PlayListWidget::listSelected,
             this, &MainWindow::do_listSelected);
+    connect(PLAY_LISTWIDGET, &PlayListWidget::exitBatchProcess,
+            this, &MainWindow::do_exitBatchProcess);
+    connect(CATEGORY_ListWIDGET, &CategoryListWidget::exitBatchProcess,
+            this, &MainWindow::do_exitBatchProcess);
 }
 
 MainWindow::~MainWindow()
@@ -169,6 +175,10 @@ void MainWindow::do_durationChanged(qint64 duration)
 
 void MainWindow::do_songIdChanged(int songId)
 {
+    if (PLAY_LISTWIDGET->currentPlaylistKind() == PlaylistKind::History) {
+        SONG_TABLEMODEL->select();
+    }
+
     QVariantMap songDetailsMap = DB->getSongDisplayDetails(songId);
     QString songTitle = songDetailsMap["title"].toString();
     QString songArtist = songDetailsMap["artist"].toString();
@@ -300,12 +310,24 @@ void MainWindow::do_favoriteChanged(int songId, int favorite)
     }
 }
 
+void MainWindow::do_exitBatchProcess()
+{
+    if (ui->btnExitBatch->isVisible()) {
+        ui->btnBatchProcess->setVisible(true);
+        ui->btnExitBatch->setVisible(false);
+        ui->btnRemoveBatch->setVisible(false);
+        ui->btnBatchAddTo->setVisible(false);
+        SONG_TABLEVIEW->exitBatchProcess();
+    }
+}
+
 void MainWindow::on_btnBatchProcess_clicked()
 {
     if (SONG_TABLEVIEW->enterBatchProcess()) {
         ui->btnBatchProcess->setVisible(false);
         ui->btnExitBatch->setVisible(true);
         ui->btnRemoveBatch->setVisible(true);
+        ui->btnBatchAddTo->setVisible(true);
     }
 }
 
@@ -475,6 +497,20 @@ void MainWindow::on_btnExitBatch_clicked()
     ui->btnBatchProcess->setVisible(true);
     ui->btnExitBatch->setVisible(false);
     ui->btnRemoveBatch->setVisible(false);
+    ui->btnBatchAddTo->setVisible(false);
     SONG_TABLEVIEW->exitBatchProcess();
+}
+
+
+void MainWindow::on_btnBatchAddTo_clicked()
+{
+    QVector<int> songIdVector = SONG_TABLEMODEL->selectedSongIds();
+    std::unique_ptr<BatchAddToMenu> batchAddToMenu(
+        new BatchAddToMenu(this
+                           , songIdVector
+                           , ui->labelListTitle->toolTip()
+                           , PLAY_LISTWIDGET->currentPlaylistKind())
+        );
+    batchAddToMenu->exec(QCursor::pos());
 }
 

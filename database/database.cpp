@@ -265,6 +265,29 @@ bool Database::insertSongIntoCategory(const QString &categoryName, int songId)
     return true;
 }
 
+void Database::insertSongIntoCategory(const QString &categoryName, QVector<int> songIdVector)
+{
+    if (!m_db.transaction()) {
+        qCritical() << "transaction failed: " << m_db.lastError().text();
+    }
+
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO songCategoryRelationship (song_id, category_name) "
+                  "VALUES (:songId, :categoryName)");
+    for (const auto& songId : songIdVector) {
+        query.bindValue(":songId", songId);
+        query.bindValue(":categoryName", categoryName);
+        if (!query.exec()) {
+            qCritical() << "SQL Error in insertSongToCategory function: " << query.lastError().text();
+        }
+    }
+
+    if (!m_db.commit()) {
+        qCritical() << "commit failed: " << m_db.lastError().text();
+        if (!m_db.rollback()) qCritical() << "rollback failed: " << m_db.lastError().text();
+    }
+}
+
 bool Database::isSongInCategory(const QString &categoryName, int songId)
 {
     QSqlQuery query(m_db);

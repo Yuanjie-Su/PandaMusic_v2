@@ -10,6 +10,7 @@ TitleDelegate::TitleDelegate(QObject *parent)
 void TitleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     // 绘制封面
+    painter->save();
     QRect iconRect = option.rect;
     iconRect.setSize(QSize(40, 40));
     iconRect.moveTop(iconRect.top() + 5);
@@ -20,7 +21,6 @@ void TitleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     } else {
         painter->fillRect(option.rect, index.data(Qt::BackgroundRole).value<QBrush>());
     }
-    painter->save();
     painter->drawPixmap(iconRect, index.data(Qt::DecorationRole).value<QPixmap>());
     painter->restore();
 
@@ -31,8 +31,11 @@ void TitleDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     painter->save();
     QTextDocument doc;
     doc.setHtml(index.data(Qt::DisplayRole).toString());
+    // 设置 QTextOption 为不换行
+    QTextOption textOption;
+    textOption.setWrapMode(QTextOption::NoWrap);
+    doc.setDefaultTextOption(textOption);
     painter->translate(textRect.topLeft());
-    doc.setTextWidth(textRect.width());
     doc.drawContents(painter);
     painter->restore();
 }

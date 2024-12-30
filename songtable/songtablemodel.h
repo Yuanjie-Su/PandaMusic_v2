@@ -20,17 +20,20 @@ public:
     void batchPlay(bool allSelected = true);
     void removeSelected(const QString &categoryName = QString()
                         ,  PlaylistKind listKind = PlaylistKind::Custom);
+    QVector<int> selectedSongIds();
     void resetCheckState();
 
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QString selectStatement() const override;
 
 public slots:
     bool select() override;
 
 signals:
     void checkStateChanged(Qt::CheckState checkState);
+    void favoriteChanged();
 
 private:
     // 构造函数设为私有，禁止外部直接实例化

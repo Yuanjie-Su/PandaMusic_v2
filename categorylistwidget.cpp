@@ -123,6 +123,26 @@ void CategoryListWidget::createNewCategoryName(int songId)
     insertCategory();
 }
 
+void CategoryListWidget::createNewCategoryName(const QVector<int> &songIdVector)
+{
+    if (songIdVector.isEmpty())
+        return;
+
+    if (songIdVector.isEmpty()) {
+        return;
+    }
+    m_tempSongIdVector = songIdVector;
+
+    if (m_tempCoverPath.isEmpty())
+        m_tempCoverPath = ":/cover/images/panda-listening-music.jpg";
+
+    m_isNewNameEditing = true;
+    m_editRow = 0;
+    m_tempCategoryName = getNewCategoryName();
+
+    insertCategory();
+}
+
 void CategoryListWidget::insertCategory()
 {
     QListWidgetItem *item = new QListWidgetItem();
@@ -231,6 +251,13 @@ void CategoryListWidget::do_ItemEditFinished(QWidget *editor, QAbstractItemDeleg
                 DB->insertSongIntoCategory(categoryName, m_tempSongId);
                 m_tempSongId = -1;
             }
+
+            if (!m_tempSongIdVector.isEmpty()) {
+                for (int songId : m_tempSongIdVector) {
+                    DB->insertSongIntoCategory(categoryName, songId);
+                }
+                m_tempSongIdVector.clear();
+            }
         } else {
             m_categoryNameSet.remove(m_tempCategoryName);
             DB->updateCategory(categoryName, m_tempCategoryName);
@@ -249,6 +276,7 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
 
             QString categoryName = item->toolTip();
             int row = this->row(item);
+            emit exitBatchProcess();
 
             if (row != m_currentRow) {
                 m_currentRow = row;
@@ -258,7 +286,11 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
                     PLAY_LISTWIDGET->clearSelection();
                 }
 
-                // SONG_TABLEWIDGET->updateTable(DB->selectFromSongCategory(categoryName));
+                emit listSelected(categoryName);
+                SONG_TABLEMODEL->setFilter(
+                    QString("id IN (SELECT song_id FROM songCategoryRelationship WHERE category_name = '%1')").arg(categoryName)
+                    );
+                SONG_TABLEMODEL->select();
             }
 
             this->setCurrentItem(item);
@@ -273,7 +305,7 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
             categoryMenu->addAction(action);
             if (DB->isCategoryContainSong(categoryName)) {
                 connect(action, &QAction::triggered
-                        , this, [] () { /*SONG_TABLEWIDGET->batchPlay();*/ });
+                        , this, [] () { SONG_TABLEMODEL->batchPlay(); });
             } else {
                 action->setEnabled(false);
             }
@@ -332,6 +364,8 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
 void CategoryListWidget::do_itemClicked(QListWidgetItem *item)
 {
     Q_UNUSED(item)
+
+    emit exitBatchProcess();
 
     if (this->currentRow() == m_currentRow)
         return;

@@ -52,5 +52,3 @@ bool FavoriteDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, con
     }
     return false;
 }
-
-

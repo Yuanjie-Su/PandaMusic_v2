@@ -15,6 +15,7 @@ public:
     static CategoryListWidget* instance(QWidget *parent = nullptr);
 
     void createNewCategoryName(int songId = -1);
+    void createNewCategoryName(const QVector<int> &songIdVector);
 
     int m_currentRow = -1; // 上一次选中行
 
@@ -23,6 +24,7 @@ protected:
 
 signals:
     void listSelected(const QString &listName);
+    void exitBatchProcess();
 
 private slots:
     void do_itemClicked(QListWidgetItem *item);
@@ -47,6 +49,7 @@ private:
     QString m_tempCategoryName;
     QString m_tempCoverPath;
     int m_tempSongId = -1;
+    QVector<int> m_tempSongIdVector;
     int m_editRow = -1;
     bool m_isNewNameEditing = false;
 };
