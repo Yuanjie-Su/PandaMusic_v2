@@ -47,6 +47,7 @@
         <file>images/lyric_hide.png</file>
         <file>images/partially_checked.png</file>
         <file>images/addToButton.png</file>
+        <file>images/search.png</file>
     </qresource>
     <qresource prefix="/cover">
         <file>images/panda-listening-music.jpg</file>

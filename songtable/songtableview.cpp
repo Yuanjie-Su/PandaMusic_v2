@@ -4,6 +4,8 @@
 #include "songtablemodel.h"
 #include "mymenu/moremenu.h"
 #include "utils/constants.h"
+#include "playlistwidget.h"
+#include "categorylistwidget.h"
 
 #include <QContextMenuEvent>
 
@@ -148,7 +150,11 @@ void SongTableView::contextMenuEvent(QContextMenuEvent *event)
         int row = index.row();
         int songId = SONG_TABLEMODEL->data(SONG_TABLEMODEL->index(row, TableColumns::IdColumn), Qt::DisplayRole).toInt();
         int favorite = SONG_TABLEMODEL->data(SONG_TABLEMODEL->index(row, TableColumns::FavoriteColumn), Qt::DisplayRole).toInt();
-        std::unique_ptr<MoreMenu> moreMenu(new MoreMenu(this, songId, favorite));
+        std::unique_ptr<MoreMenu> moreMenu(new MoreMenu(this
+                                                        , songId
+                                                        , favorite
+                                                        , SONG_TABLEMODEL->currentPlaylistKind()
+                                                        , CATEGORY_LISTWIDGET->currentCategoryName()));
         moreMenu->exec(QCursor::pos());
     } else {
         std::unique_ptr<MoreMenu> moreMenu(new MoreMenu(this, -1, 0));

@@ -15,6 +15,7 @@
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
@@ -48,8 +49,9 @@ public:
     QPushButton *btnImport;
     QPushButton *btnBatchAddTo;
     QPushButton *btnRemoveBatch;
-    QSpacerItem *horizontalSpacer_6;
     QPushButton *btnExitBatch;
+    QSpacerItem *horizontalSpacer_6;
+    QLineEdit *lineEditSearch;
     LyricsWidget *lyricsWidget;
     QWidget *widgetPlayControl;
     QHBoxLayout *horizontalLayout_6;
@@ -285,10 +287,6 @@ public:
 
         horizontalLayout_3->addWidget(btnRemoveBatch);
 
-        horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout_3->addItem(horizontalSpacer_6);
-
         btnExitBatch = new QPushButton(frameTable);
         btnExitBatch->setObjectName(QString::fromUtf8("btnExitBatch"));
         btnExitBatch->setFont(font2);
@@ -304,6 +302,31 @@ public:
 "}"));
 
         horizontalLayout_3->addWidget(btnExitBatch);
+
+        horizontalSpacer_6 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_3->addItem(horizontalSpacer_6);
+
+        lineEditSearch = new QLineEdit(frameTable);
+        lineEditSearch->setObjectName(QString::fromUtf8("lineEditSearch"));
+        sizePolicy1.setHeightForWidth(lineEditSearch->sizePolicy().hasHeightForWidth());
+        lineEditSearch->setSizePolicy(sizePolicy1);
+        lineEditSearch->setMinimumSize(QSize(120, 0));
+        lineEditSearch->setMaximumSize(QSize(120, 16777215));
+        lineEditSearch->setStyleSheet(QString::fromUtf8("QLineEdit#lineEditSearch {\n"
+"           background-color: rgb(230,230,230);\n"
+"border: none;\n"
+"border-radius:16px;\n"
+" padding-top: 8px;\n"
+"padding-bottom:8px;\n"
+"padding-left: 10px;\n"
+"padding-right:20px;\n"
+"            }"));
+        lineEditSearch->setFrame(false);
+        lineEditSearch->setCursorMoveStyle(Qt::LogicalMoveStyle);
+        lineEditSearch->setClearButtonEnabled(false);
+
+        horizontalLayout_3->addWidget(lineEditSearch);
 
 
         verticalLayout_5->addLayout(horizontalLayout_3);
@@ -383,7 +406,7 @@ public:
         QIcon icon7;
         icon7.addFile(QString::fromUtf8(":/icons/images/unlike.png"), QSize(), QIcon::Normal, QIcon::Off);
         btnFavoriteOne->setIcon(icon7);
-        btnFavoriteOne->setIconSize(QSize(24, 24));
+        btnFavoriteOne->setIconSize(QSize(20, 20));
 
         horizontalLayout_5->addWidget(btnFavoriteOne);
 
@@ -396,7 +419,7 @@ public:
         QIcon icon8;
         icon8.addFile(QString::fromUtf8(":/icons/images/coment.png"), QSize(), QIcon::Normal, QIcon::Off);
         btnComent->setIcon(icon8);
-        btnComent->setIconSize(QSize(24, 24));
+        btnComent->setIconSize(QSize(20, 20));
 
         horizontalLayout_5->addWidget(btnComent);
 
@@ -410,7 +433,7 @@ public:
         QIcon icon9;
         icon9.addFile(QString::fromUtf8(":/icons/images/more.png"), QSize(), QIcon::Normal, QIcon::Off);
         btnMoreOne->setIcon(icon9);
-        btnMoreOne->setIconSize(QSize(20, 20));
+        btnMoreOne->setIconSize(QSize(16, 16));
 
         horizontalLayout_5->addWidget(btnMoreOne);
 
@@ -667,6 +690,8 @@ public:
         btnExitBatch->setToolTip(QCoreApplication::translate("MainWindow", "\351\200\200\345\207\272\346\211\271\351\207\217\346\223\215\344\275\234", nullptr));
 #endif // QT_CONFIG(tooltip)
         btnExitBatch->setText(QCoreApplication::translate("MainWindow", "\351\200\200\345\207\272\346\211\271\351\207\217\346\223\215\344\275\234", nullptr));
+        lineEditSearch->setInputMask(QString());
+        lineEditSearch->setPlaceholderText(QString());
         btnCover->setText(QString());
         labelTitle->setText(QCoreApplication::translate("MainWindow", "\346\255\214\345\220\215", nullptr));
         btnFavoriteOne->setText(QString());

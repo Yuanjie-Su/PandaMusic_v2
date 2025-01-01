@@ -59,10 +59,9 @@ void TRotatedLabel::trogglePlay(bool isPlaying)
     }
 }
 
-void TRotatedLabel::setCenterPixmap(const QString &path) {
-    if (path.isEmpty() || !centerPixmap.load(path)) {
-        centerPixmap.load(":/cover/images/panda-listening-music.jpg");
-    }
+void TRotatedLabel::setCenterPixmap(const QPixmap &pixmap)
+{
+    centerPixmap = pixmap;
 }
 
 void TRotatedLabel::setPoleState(bool isPlaying)

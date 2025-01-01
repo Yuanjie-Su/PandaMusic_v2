@@ -40,41 +40,33 @@ public slots:
     void do_positionChanged(qint64 pos);
     void do_durationChanged(qint64 duration);
     void do_songIdChanged(int songId);
+    void do_metaDataChanged(const QVariantMap &songDetailsMap);
     void on_btnBatchPlay_clicked();
     void do_listSelected(const QString &listName);
     void do_favoriteChanged(int songId, int favorite);
     void do_exitBatchProcess();
 
 private slots:
-    void on_btnPlay_clicked();
-
     void on_btnBatchProcess_clicked();
+    void on_btnExitBatch_clicked();
+    void on_btnBatchAddTo_clicked();
+    void on_btnRemoveBatch_clicked();
 
     void on_btnFavoriteOne_clicked();
-
     void on_btnMoreOne_clicked();
 
+    void on_btnPlay_clicked();
     void on_btnVolume_clicked();
-
     void do_mutedChanged(bool muted);
-
     void on_btnPlayMode_clicked();
-
     void do_playModeChanged(Player::PlayBackMode playBackMode);
 
     void on_btnNewCategory_clicked();
 
     void on_btnLyric_clicked();
-
-    void on_btnRemoveBatch_clicked();
-
     void on_btnCover_clicked(bool checked);
 
     void on_btnImport_clicked();
-
-    void on_btnExitBatch_clicked();
-
-    void on_btnBatchAddTo_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -95,6 +87,7 @@ private:
     void parseLrcFile(const QString &filePath);
     // 更新进度条当前时间显示
     void updateLabelPosition(qint64 pos);
+    void actionSearch(const QString &text);
 
 };
 

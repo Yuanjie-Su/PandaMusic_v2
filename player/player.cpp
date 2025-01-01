@@ -5,6 +5,7 @@
 #include <QGlobalStatic>
 #include <QMediaMetaData>
 #include <QRandomGenerator>
+#include <QImage>
 
 Q_GLOBAL_STATIC(Player, player)
 
@@ -18,6 +19,9 @@ Player::Player(QObject *parent) : QObject{parent} {
 
     connect(m_player, &QMediaPlayer::sourceChanged,
             this, &Player::do_sourceChanged);
+
+    connect(m_player, &QMediaPlayer::metaDataChanged,
+            this, &Player::do_metaDataChanged);
 }
 
 Player *Player::instance() { return player; }
@@ -48,33 +52,64 @@ void Player::initPlaylist(const QVector<int> &songIdVector)
 
 void Player::removeSong(int songId)
 {
-    DB->deleteSongFromHistory(songId);
+    DB->deleteSongFromPlaylist(songId);
+    int currentSongId
+        = m_currentIndex == -1 ? -1 : m_songIdVector[m_currentIndex];
+    int nextSongId
+        = m_nextIndex == -1 ? -1 : m_songIdVector[m_nextIndex];
     int index = m_songIdVector.indexOf(songId);
     if (index != -1) {
         m_songIdVector.removeAt(index);
         if (m_songIdVector.isEmpty()) {
             m_player->stop();
-            m_cureentIndex = -1;
+            m_currentIndex = -1;
             m_nextIndex = -1;
             emit playListIsEmpty();
-            return;
-        }
-
-        // 更新索引
-        if (index < m_cureentIndex) {
-            --m_cureentIndex;
-        } else if (index == m_cureentIndex) {
-            if (m_cureentIndex >= m_songIdVector.size()) {
-                m_cureentIndex = m_songIdVector.size() - 1;
+        } else {
+            int currentIndex =  m_songIdVector.indexOf(currentSongId);
+            if (currentIndex == -1) {
+                int nextIndex = m_songIdVector.indexOf(nextSongId);
+                m_currentIndex = nextIndex == -1 ? 0 : nextIndex;
+                playByIndex(m_currentIndex);
+                m_nextIndex = -1;
+            } else {
+                int nextIndex = m_songIdVector.indexOf(nextSongId);
+                if (nextIndex != -1)
+                    m_nextIndex = nextIndex;
             }
-            playByIndex(m_cureentIndex);
         }
+    }
+}
 
-        // 更新下一首歌曲的索引
-        if (index == m_nextIndex || m_nextIndex >= m_songIdVector.size()) {
+void Player::removeSongs(const QVector<int> &songIdVector)
+{
+    DB->deleteSongsFromPlaylist(songIdVector);
+    int currentSongId
+        = m_currentIndex == -1 ? -1 : m_songIdVector[m_currentIndex];
+    int nextSongId
+        = m_nextIndex == -1 ? -1 : m_songIdVector[m_nextIndex];
+    for (int songId : songIdVector) {
+        int index = m_songIdVector.indexOf(songId);
+        if (index != -1) {
+            m_songIdVector.removeAt(index);
+        }
+    }
+    if (m_songIdVector.isEmpty()) {
+        m_player->stop();
+        m_currentIndex = -1;
+        m_nextIndex = -1;
+        emit playListIsEmpty();
+    } else {
+        int currentIndex =  m_songIdVector.indexOf(currentSongId);
+        if (currentIndex == -1) {
+            int nextIndex = m_songIdVector.indexOf(nextSongId);
+            m_currentIndex = nextIndex == -1 ? 0 : nextIndex;
+            playByIndex(m_currentIndex);
             m_nextIndex = -1;
-        } else if (index < m_nextIndex) {
-            --m_nextIndex;
+        } else {
+            int nextIndex = m_songIdVector.indexOf(nextSongId);
+            if (nextIndex != -1)
+                m_nextIndex = nextIndex;
         }
     }
 }
@@ -95,8 +130,8 @@ bool Player::play() {
             if (m_nextIndex != -1)
                 m_nextIndex = -1;
 
-            m_cureentIndex = 0;
-            playByIndex(m_cureentIndex);
+            m_currentIndex = 0;
+            playByIndex(m_currentIndex);
             return true;
         }
     } else {
@@ -113,8 +148,8 @@ void Player::play(int songId) {
         DB->insertSongIntoPlaylist(songId);
         index = m_songIdVector.size() - 1;
     }
-    m_cureentIndex = index;
-    playByIndex(m_cureentIndex);
+    m_currentIndex = index;
+    playByIndex(m_currentIndex);
 }
 
 void Player::play(const QVector<int> &songIdVector)
@@ -124,8 +159,8 @@ void Player::play(const QVector<int> &songIdVector)
 
     m_songIdVector = songIdVector;
     DB->insertSongsIntoPlaylist(songIdVector);
-    m_cureentIndex = 0;
-    playByIndex(m_cureentIndex);
+    m_currentIndex = 0;
+    playByIndex(m_currentIndex);
 }
 
 void Player::playByIndex(int index)
@@ -178,31 +213,31 @@ void Player::updateIndex(int direction)
     case LoopSingle:
         break;
     case Random:
-        m_cureentIndex =
-            (m_cureentIndex + QRandomGenerator::global()->bounded(size)) % size;
+        m_currentIndex =
+            (m_currentIndex + QRandomGenerator::global()->bounded(size)) % size;
         break;
     default:
-        m_cureentIndex += direction;
-        if (m_cureentIndex < 0) m_cureentIndex = size - 1;
-        m_cureentIndex %= size;
+        m_currentIndex += direction;
+        if (m_currentIndex < 0) m_currentIndex = size - 1;
+        m_currentIndex %= size;
         break;
     }
 }
 
 void Player::previous() {
     updateIndex(-1);
-    playByIndex(m_cureentIndex);
+    playByIndex(m_currentIndex);
 }
 
 void Player::next() {
     if (m_nextIndex != -1) {
-        m_cureentIndex = m_nextIndex;
+        m_currentIndex = m_nextIndex;
         m_nextIndex = -1;
     } else {
         updateIndex(1);
     }
 
-    playByIndex(m_cureentIndex);
+    playByIndex(m_currentIndex);
 }
 
 void Player::setPosition(int value)
@@ -229,23 +264,39 @@ void Player::do_mediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
     if (status == QMediaPlayer::EndOfMedia) {
         if (m_nextIndex != -1) {
-            m_cureentIndex = m_nextIndex;
+            m_currentIndex = m_nextIndex;
             m_nextIndex = -1;
         } else {
             updateIndex(1);
-            if (m_playBackMode == PlayBackMode::Sequential && m_cureentIndex == 0) {
-                m_cureentIndex = m_songIdVector.size() - 1;
+            if (m_playBackMode == PlayBackMode::Sequential && m_currentIndex == 0) {
+                m_currentIndex = m_songIdVector.size() - 1;
                 return;
             }
         }
-        playByIndex(m_cureentIndex);
+        playByIndex(m_currentIndex);
     }
 }
 
 void Player::do_sourceChanged(const QUrl &media)
 {
     Q_UNUSED(media);
-    int songId = m_songIdVector[m_cureentIndex];
+    int songId = m_songIdVector[m_currentIndex];
     DB->insertSongIntoHistory(songId);
     emit songIdChanged(songId);
+}
+
+void Player::do_metaDataChanged()
+{
+    QVariantMap songDetails;
+    QMediaMetaData metaData = m_player->metaData();
+    // songDetails["songId"] = m_songIdVector[m_cureentIndex];
+    // songDetails["title"] = metaData.value(QMediaMetaData::Title).toString();
+    // songDetails["artist"] = metaData.value(QMediaMetaData::Author).toString();
+    QVariant cover = metaData.value(QMediaMetaData::ThumbnailImage);
+    if (cover.isValid()) {
+        songDetails["coverImage"] = cover.value<QImage>();
+    } else {
+        songDetails["coverImage"] = QImage();
+    }
+    emit metaDataChanged(songDetails);
 }

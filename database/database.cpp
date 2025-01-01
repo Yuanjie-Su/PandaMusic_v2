@@ -636,7 +636,7 @@ QString Database::getSongCoverPath(int songId)
 
 QVariantMap Database::getSongDetails(int songId)
 {
-    // title, artist
+    // title, artist, album
     QSqlQuery query(m_db);
     query.prepare("SELECT title, artist, album FROM song WHERE id = :songId");
     query.bindValue(":songId", songId);

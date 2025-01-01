@@ -6,9 +6,6 @@
 
 #define PLAYER Player::instance()
 
-class QAudioOutput;
-class QMediaPlayer;
-class Playlist;
 class Player : public QObject {
     Q_OBJECT
 
@@ -32,6 +29,7 @@ public:
     void addSong(const QVector<int> &);
     void initPlaylist(const QVector<int> &);
     void removeSong(int);
+    void removeSongs(const QVector<int> &);
     bool isPlaying();
     bool isInPlaylist(int);
 
@@ -50,6 +48,7 @@ private:
 signals:
     void songIdChanged(int);
     void playListIsEmpty();
+    void metaDataChanged(const QVariantMap &);
 
 public slots:
     void previous();
@@ -62,6 +61,7 @@ public slots:
 private slots:
     void do_mediaStatusChanged(QMediaPlayer::MediaStatus);
     void do_sourceChanged(const QUrl &);
+    void do_metaDataChanged();
 
 private:
     QAudioOutput *m_output = nullptr;
@@ -69,6 +69,6 @@ private:
 
     PlayBackMode m_playBackMode = Sequential;
     QVector<int> m_songIdVector;
-    int m_cureentIndex = -1;
+    int m_currentIndex = -1;
     int m_nextIndex = -1;
 };

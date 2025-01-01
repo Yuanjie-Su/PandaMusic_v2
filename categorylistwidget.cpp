@@ -143,6 +143,14 @@ void CategoryListWidget::createNewCategoryName(const QVector<int> &songIdVector)
     insertCategory();
 }
 
+QString CategoryListWidget::currentCategoryName()
+{
+    QListWidgetItem *item = this->currentItem();
+    if (item)
+        return item->toolTip();
+    return QString();
+}
+
 void CategoryListWidget::insertCategory()
 {
     QListWidgetItem *item = new QListWidgetItem();
@@ -379,9 +387,5 @@ void CategoryListWidget::do_itemClicked(QListWidgetItem *item)
 
     QString categoryName = this->currentItem()->toolTip();
     emit listSelected(categoryName);
-
-    SONG_TABLEMODEL->setFilter(
-        QString("id IN (SELECT song_id FROM songCategoryRelationship WHERE category_name = '%1')").arg(categoryName)
-        );
-    SONG_TABLEMODEL->select();
+    SONG_TABLEMODEL->updateTable(categoryName, PlaylistKind::Custom);
 }

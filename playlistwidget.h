@@ -16,7 +16,6 @@ public:
     PlayListWidget& operator=(const PlayListWidget &) = delete;
     // 获取单例实例
     static PlayListWidget* instance(QWidget *parent = nullptr);
-    PlaylistKind currentPlaylistKind() const { return m_currentKind; }
 
 signals:
     void listSelected(const QString &listName);
@@ -30,8 +29,6 @@ private:
     explicit PlayListWidget(QWidget *parent = nullptr);
 
     static PlayListWidget *m_instance;  // 单例实例
-
-    PlaylistKind m_currentKind = PlaylistKind::PlayQueue;
 
     QString m_pathUnlikeIcon = ":/icons/images/unlike.png";
     QString m_pathPlaylist = ":/icons/images/playlist.png";

@@ -38,3 +38,43 @@ QPixmap ImageUtils::getRoundedPixmap(const QString &coverPath, int width, int he
 
     return desPixMap;
 }
+
+QPixmap ImageUtils::getRoundedPixmap(const QImage &coverImage, int width, int height, int radius)
+{
+    QPixmap srcPixmap = QPixmap::fromImage(coverImage.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+    // 新建一个目标大小的画布
+    QPixmap desPixMap(width, height);
+    desPixMap.fill(Qt::transparent);
+
+    QPainter painter(&desPixMap);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
+    // 圆角路径
+    QPainterPath path;
+    path.addRoundedRect(0, 0, width, height, radius, radius);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, srcPixmap);
+
+    return desPixMap;
+}
+
+QPixmap ImageUtils::getRoundedPixmap(const QPixmap &coverPixmap, int width, int height, int radius)
+{
+    QPixmap srcPixmap = coverPixmap.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    // 新建一个目标大小的画布
+    QPixmap desPixMap(width, height);
+    desPixMap.fill(Qt::transparent);
+
+    QPainter painter(&desPixMap);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+
+    // 圆角路径
+    QPainterPath path;
+    path.addRoundedRect(0, 0, width, height, radius, radius);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, srcPixmap);
+
+    return desPixMap;
+}

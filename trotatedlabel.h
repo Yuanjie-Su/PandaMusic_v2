@@ -13,7 +13,7 @@ public:
     ~TRotatedLabel() override;
 
     void trogglePlay(bool);
-    void setCenterPixmap(const QString &path);
+    void setCenterPixmap(const QPixmap &pixmap);
     void setPoleState(bool isPlaying);
 
 protected:

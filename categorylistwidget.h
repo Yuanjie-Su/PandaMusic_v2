@@ -3,7 +3,7 @@
 
 #include <QListWidget>
 
-#define CATEGORY_ListWIDGET CategoryListWidget::instance()
+#define CATEGORY_LISTWIDGET CategoryListWidget::instance()
 
 class CategoryListWidget : public QListWidget
 {
@@ -16,6 +16,7 @@ public:
 
     void createNewCategoryName(int songId = -1);
     void createNewCategoryName(const QVector<int> &songIdVector);
+    QString currentCategoryName();
 
     int m_currentRow = -1; // 上一次选中行
 

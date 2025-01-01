@@ -62,41 +62,32 @@ void PlayListWidget::do_currentRowChanged(int row)
     emit exitBatchProcess();
 
     if (row == -1) {
-        m_currentKind = PlaylistKind::Custom;
         return;
     }
 
-    if (CATEGORY_ListWIDGET->selectionModel()->hasSelection()) {
-        CATEGORY_ListWIDGET->m_currentRow = -1;
-        CATEGORY_ListWIDGET->clearSelection();
+    if (CATEGORY_LISTWIDGET->selectionModel()->hasSelection()) {
+        CATEGORY_LISTWIDGET->m_currentRow = -1;
+        CATEGORY_LISTWIDGET->clearSelection();
     }
 
     switch (row) {
     case 0 :{
-        m_currentKind = PlaylistKind::Favorite;
-        SONG_TABLEMODEL->setFilter("favorite = 1");
-        SONG_TABLEMODEL->select();
+        SONG_TABLEMODEL->updateTable("喜欢", PlaylistKind::Favorite);
         emit listSelected("喜欢");
         break;
     }
     case 1:{
-        m_currentKind = PlaylistKind::PlayQueue;
-        SONG_TABLEMODEL->setFilter("id IN (SELECT song_id FROM playlist)");
-        SONG_TABLEMODEL->select();
+        SONG_TABLEMODEL->updateTable("播放队列", PlaylistKind::PlayQueue);
         emit listSelected("播放队列");
         break;
     }
     case 2: {
-        m_currentKind = PlaylistKind::History;
-        SONG_TABLEMODEL->setFilter("id IN (SELECT song_id FROM history)");
-        SONG_TABLEMODEL->select();
+        SONG_TABLEMODEL->updateTable("最近播放", PlaylistKind::History);
         emit listSelected("最近播放");
         break;
     }
     default: {
-        m_currentKind = PlaylistKind::LocalAndDownload;
-        SONG_TABLEMODEL->setFilter("");
-        SONG_TABLEMODEL->select();
+        SONG_TABLEMODEL->updateTable("本地和下载", PlaylistKind::LocalAndDownload);
         emit listSelected("本地和下载");
         break;
     }

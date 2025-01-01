@@ -18,10 +18,13 @@ public:
 
     void setCheckedAll(Qt::CheckState checked);
     void batchPlay(bool allSelected = true);
-    void removeSelected(const QString &categoryName = QString()
-                        ,  PlaylistKind listKind = PlaylistKind::Custom);
+    void removeSelected(const QString &categoryName = QString());
+    void removeSong(int songId, PlaylistKind listKind, const QString &categoryName = QString());
     QVector<int> selectedSongIds();
     void resetCheckState();
+    void changeFavorite(int favorite, int songId);
+    void updateTable(const QString &listName = QString(), PlaylistKind kind = PlaylistKind::PlayQueue);
+    PlaylistKind currentPlaylistKind() const { return m_currentKind; }
 
     QVariant data(const QModelIndex &index, int role) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
@@ -33,13 +36,15 @@ public slots:
 
 signals:
     void checkStateChanged(Qt::CheckState checkState);
-    void favoriteChanged();
+    void favoriteChanged(int songId, int favorite);
 
 private:
     // 构造函数设为私有，禁止外部直接实例化
     explicit SongTableModel(QObject *parent = nullptr, QSqlDatabase db = QSqlDatabase());
     ~SongTableModel() = default;
-    static SongTableModel *m_instance; // 静态实例指针
+    static SongTableModel *m_instance;
+
+    PlaylistKind m_currentKind = PlaylistKind::PlayQueue;
 
     bool notAllCheckedEdit = true;
     int checkedCount = 0;
@@ -49,6 +54,7 @@ private:
     QVector<QColor> m_rowBackground;
 
     QMap<int, QPixmap> m_coverCache;
+
     void updateCheckState(int row, Qt::CheckState checkState);
 };
 

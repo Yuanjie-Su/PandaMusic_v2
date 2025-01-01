@@ -30,7 +30,7 @@ AddToMenu::AddToMenu(QWidget *parent, int songId)
     action->setIcon(QIcon(":/icons/images/add_to_new.png"));
     this->addAction(action);
     connect(action, &QAction::triggered, this, [songId](){
-        CATEGORY_ListWIDGET->createNewCategoryName(songId);
+        CATEGORY_LISTWIDGET->createNewCategoryName(songId);
     });
     this->addSeparator();
 

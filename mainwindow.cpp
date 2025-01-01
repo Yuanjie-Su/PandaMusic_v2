@@ -59,6 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btnExitBatch->setVisible(false);
     ui->btnRemoveBatch->setVisible(false);
     ui->btnBatchAddTo->setVisible(false);
+    // 当前播放歌曲相关的按钮
+    ui->btnFavoriteOne->setEnabled(false);
+    ui->btnMoreOne->setEnabled(false);
+    ui->btnComent->setEnabled(false);
 
     // 歌词界面不可见
     ui->lyricsWidget->setVisible(false);
@@ -87,6 +91,20 @@ MainWindow::MainWindow(QWidget *parent) :
                          "<span style='margin:0; font-family:Microsoft YaHei; font-size:11px; color:#505050;'>听我想听</span>";
     ui->labelTitle->setText(htmlString);
 
+    // 搜索框action
+    QAction *searchAction = new QAction(this);
+    searchAction->setToolTip("搜索");
+    searchAction->setIcon(QIcon(":/icons/images/search.png"));
+    ui->lineEditSearch->addAction(searchAction, QLineEdit::TrailingPosition);
+    ui->lineEditSearch->setPlaceholderText("搜索");
+    ui->lineEditSearch->setFocusPolicy(Qt::ClickFocus);
+    this->setFocusPolicy(Qt::ClickFocus);
+    connect(searchAction, &QAction::triggered, this, [this] {
+        actionSearch(ui->lineEditSearch->text().trimmed());
+    });
+    connect(ui->lineEditSearch, &QLineEdit::returnPressed, this, [this] {
+        actionSearch(ui->lineEditSearch->text().trimmed());
+    });
 
     connect(ui->btnPrevious, &QPushButton::clicked,
             PLAYER, &Player::previous);
@@ -109,16 +127,18 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::do_positionChanged);
     connect(PLAYER, &Player::songIdChanged,
             this, &MainWindow::do_songIdChanged);
-    // connect(SONG_TABLEWIDGET, &SongTableWidget::favoriteChanged
-    //         , this, &MainWindow::do_favoriteChanged);
-    connect(CATEGORY_ListWIDGET, &CategoryListWidget::listSelected,
+    connect(PLAYER, &Player::metaDataChanged,
+            this, &MainWindow::do_metaDataChanged);
+    connect(CATEGORY_LISTWIDGET, &CategoryListWidget::listSelected,
             this, &MainWindow::do_listSelected);
     connect(PLAY_LISTWIDGET, &PlayListWidget::listSelected,
             this, &MainWindow::do_listSelected);
     connect(PLAY_LISTWIDGET, &PlayListWidget::exitBatchProcess,
             this, &MainWindow::do_exitBatchProcess);
-    connect(CATEGORY_ListWIDGET, &CategoryListWidget::exitBatchProcess,
+    connect(CATEGORY_LISTWIDGET, &CategoryListWidget::exitBatchProcess,
             this, &MainWindow::do_exitBatchProcess);
+    connect(SONG_TABLEMODEL, &SongTableModel::favoriteChanged,
+            this, &MainWindow::do_favoriteChanged);
 }
 
 MainWindow::~MainWindow()
@@ -175,11 +195,14 @@ void MainWindow::do_durationChanged(qint64 duration)
 
 void MainWindow::do_songIdChanged(int songId)
 {
-    if (PLAY_LISTWIDGET->currentPlaylistKind() == PlaylistKind::History) {
+    if (SONG_TABLEMODEL->currentPlaylistKind() == PlaylistKind::History) {
         SONG_TABLEMODEL->select();
     }
 
     QVariantMap songDetailsMap = DB->getSongDisplayDetails(songId);
+    if (songDetailsMap.isEmpty())
+        return;
+
     QString songTitle = songDetailsMap["title"].toString();
     QString songArtist = songDetailsMap["artist"].toString();
 
@@ -191,34 +214,46 @@ void MainWindow::do_songIdChanged(int songId)
         );
     ui->labelListTitle->setToolTip(songDetailsMap["title"].toString());
 
-    // 设置封面
-    QIcon btnCoverIcon = ui->btnCover->icon();
-    QPixmap cover = ImageUtils::getRoundedPixmap(songDetailsMap["cover"].toString(), 56, 56);
-    if (cover.isNull()) {
-        cover = ImageUtils::getRoundedPixmap(m_pathCover, 56, 56);
-    }
-    btnCoverIcon.addPixmap(cover, QIcon::Normal, QIcon::Off);
-    btnCoverIcon.addPixmap(cover, QIcon::Active, QIcon::Off);
-    ui->btnCover->setIcon(btnCoverIcon);
-
     // 设置"喜欢"按钮
     int favoriteLabel = songDetailsMap["favorite"].toInt();
-    if (favoriteLabel != -1) {
-        QString iconPath = favoriteLabel ? m_pathLikeIcon : m_pathUnlikeIcon;
-        QString tooltip = favoriteLabel ? "取消喜欢" : "喜欢";
-        ui->btnFavoriteOne->setIcon(QIcon(iconPath));
-        ui->btnFavoriteOne->setToolTip(tooltip);
-        ui->btnFavoriteOne->setProperty("songId", songId);
-        ui->btnFavoriteOne->setProperty("favorite", favoriteLabel);
-    }
+    QString iconPath = favoriteLabel ? m_pathLikeIcon : m_pathUnlikeIcon;
+    QString tooltip = favoriteLabel ? "取消喜欢" : "喜欢";
+    ui->btnFavoriteOne->setIcon(QIcon(iconPath));
+    ui->btnFavoriteOne->setToolTip(tooltip);
+    ui->btnFavoriteOne->setProperty("songId", songId);
+    ui->btnFavoriteOne->setProperty("favorite", favoriteLabel);
 
     // 提取歌词
     parseLrcFile(songDetailsMap["lyric"].toString());
     ui->lyricsWidget->setLyrics(m_lyricMap, songTitle, songArtist);
-    ui->lyricsWidget->coverDisk()->setCenterPixmap(DB->getSongCoverPath(songId));
     m_currentLyricKey = -1;
     m_currentLyricEnd = -1;
     m_currentSeconds = -1;
+
+    if (!ui->btnFavoriteOne->isEnabled()) {
+        ui->btnFavoriteOne->setEnabled(true);
+        ui->btnMoreOne->setEnabled(true);
+    }
+}
+
+void MainWindow::do_metaDataChanged(const QVariantMap &songDetailsMap)
+{
+    // 设置封面
+    QIcon btnCoverIcon = ui->btnCover->icon();
+    QImage coverImage = songDetailsMap["coverImage"].value<QImage>();
+    QPixmap cover;
+    if (coverImage.isNull()) {
+        cover = QPixmap(m_pathCover);
+        ui->lyricsWidget->coverDisk()->setCenterPixmap(cover);
+        cover = ImageUtils::getRoundedPixmap(cover);
+    } else {
+        ui->lyricsWidget->coverDisk()->setCenterPixmap(QPixmap::fromImage(coverImage));
+        cover = ImageUtils::getRoundedPixmap(coverImage);
+    }
+
+    btnCoverIcon.addPixmap(cover, QIcon::Normal, QIcon::Off);
+    btnCoverIcon.addPixmap(cover, QIcon::Active, QIcon::Off);
+    ui->btnCover->setIcon(btnCoverIcon);
 }
 
 void MainWindow::parseLrcFile(const QString &filePath)
@@ -257,22 +292,40 @@ void MainWindow::updateLabelPosition(qint64 pos)
     }
 }
 
+void MainWindow::actionSearch(const QString &text)
+{
+    if (text.isEmpty())
+        return;
+    do_exitBatchProcess();
+    if (CATEGORY_LISTWIDGET->selectionModel()->hasSelection()) {
+        CATEGORY_LISTWIDGET->m_currentRow = -1;
+        CATEGORY_LISTWIDGET->clearSelection();
+    }
+    if (PLAY_LISTWIDGET->selectionModel()->hasSelection()) {
+        PLAY_LISTWIDGET->setCurrentRow(-1);
+        PLAY_LISTWIDGET->clearSelection();
+    }
+
+    SONG_TABLEMODEL->updateTable(text, PlaylistKind::SearchList);
+    ui->labelListTitle->setText("搜索结果");
+}
+
 void MainWindow::on_btnMoreOne_clicked()
 {
     int songId = ui->btnFavoriteOne->property("songId").toInt();
     int favorite = ui->btnFavoriteOne->property("favorite").toInt();
-    std::unique_ptr<MoreMenu> moreMenu(new MoreMenu(this, songId, favorite));
+    std::unique_ptr<MoreMenu> moreMenu(new MoreMenu(this, songId, favorite, PlaylistKind::PlayQueue, ui->labelPlaylist->toolTip()));
     moreMenu->exec(QCursor::pos());
 }
 
 void MainWindow::on_btnFavoriteOne_clicked()
 {
-    // QPushButton *button = qobject_cast<QPushButton *>(sender());
-    // if (button) {
-    //     int songId = ui->btnFavoriteOne->property("songId").toInt();
-    //     int favorite = 1 - ui->btnFavoriteOne->property("favorite").toInt();
-    //     SONG_TABLEWIDGET->changeFavorite(favorite, songId);
-    // }
+    QPushButton *button = qobject_cast<QPushButton *>(sender());
+    if (button) {
+        int songId = ui->btnFavoriteOne->property("songId").toInt();
+        int favorite = 1 - ui->btnFavoriteOne->property("favorite").toInt();
+        SONG_TABLEMODEL->changeFavorite(favorite, songId);
+    }
 }
 
 void MainWindow::on_btnBatchPlay_clicked()
@@ -282,7 +335,7 @@ void MainWindow::on_btnBatchPlay_clicked()
 
 void MainWindow::on_btnRemoveBatch_clicked()
 {
-    SONG_TABLEMODEL->removeSelected(ui->labelListTitle->toolTip(), PLAY_LISTWIDGET->currentPlaylistKind());
+    SONG_TABLEMODEL->removeSelected(ui->labelListTitle->toolTip());
 }
 
 void MainWindow::do_listSelected(const QString &listName)
@@ -405,7 +458,7 @@ void MainWindow::do_playModeChanged(Player::PlayBackMode playBackMode)
 
 void MainWindow::on_btnNewCategory_clicked()
 {
-    CATEGORY_ListWIDGET->createNewCategoryName();
+    CATEGORY_LISTWIDGET->createNewCategoryName();
 }
 
 void MainWindow::on_btnLyric_clicked()
@@ -509,7 +562,7 @@ void MainWindow::on_btnBatchAddTo_clicked()
         new BatchAddToMenu(this
                            , songIdVector
                            , ui->labelListTitle->toolTip()
-                           , PLAY_LISTWIDGET->currentPlaylistKind())
+                           , SONG_TABLEMODEL->currentPlaylistKind())
         );
     batchAddToMenu->exec(QCursor::pos());
 }

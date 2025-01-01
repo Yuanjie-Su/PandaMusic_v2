@@ -2,12 +2,17 @@
 #include "addtomenu.h"
 #include "player/player.h"
 #include "database/database.h"
+#include "songtable/songtablemodel.h"
 
 #include <QMessageBox>
 #include <QApplication>
 #include <QClipboard>
 
-MoreMenu::MoreMenu(QWidget *parent, int songId, int favorite)
+MoreMenu::MoreMenu(QWidget *parent
+                   , int songId
+                   , int favorite
+                   , PlaylistKind listKind
+                   , const QString &categoryName)
     : BaseMenu(parent)
 {
     this->setFixedWidth(200);
@@ -58,7 +63,7 @@ MoreMenu::MoreMenu(QWidget *parent, int songId, int favorite)
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [favorite, songId](){
-            // SONG_TABLEWIDGET->changeFavorite(1 - favorite, songId);
+            SONG_TABLEMODEL->changeFavorite(favorite ? 0 : 1, songId);
         });
     } else {
         action->setEnabled(false);
@@ -93,10 +98,9 @@ MoreMenu::MoreMenu(QWidget *parent, int songId, int favorite)
     if (visible) {
         connect(action, &QAction::triggered, this, [songId](){
             QVariantMap songDetails = DB->getSongDetails(songId);
-            QString info = QString("歌曲: %1\n歌手: %2\n专辑: %3\n时长: %4")
-                               .arg(songDetails["title"].toString())
-                               .arg(songDetails["artist"].toString())
-                               .arg(songDetails["album"].toString());
+            QString info = "歌曲: " + songDetails["title"].toString() + "\n" +
+                           "歌手: " + songDetails["artist"].toString() + "\n" +
+                           "专辑: " + songDetails["album"].toString() + "\n";
             QClipboard *clipboard = QApplication::clipboard();
             clipboard->setText(info);
         });
@@ -110,10 +114,10 @@ MoreMenu::MoreMenu(QWidget *parent, int songId, int favorite)
     action->setIcon(QIcon(":/icons/images/trash.png"));
     this->addAction(action);
     if (visible) {
-        connect(action, &QAction::triggered, this, [songId](){
+        connect(action, &QAction::triggered, this, [songId, listKind, categoryName](){
             int ret = QMessageBox::question(nullptr, "删除歌曲", "确定删除该歌曲吗？");
             if (ret == QMessageBox::Yes) {
-                // SONG_TABLEWIDGET->removeSong(songId);
+                SONG_TABLEMODEL->removeSong(songId, listKind, categoryName);
             }
         });
     } else {

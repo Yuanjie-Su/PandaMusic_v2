@@ -26,7 +26,7 @@ BatchAddToMenu::BatchAddToMenu(QWidget *parent, QVector<int> songIdVector, const
     action->setIcon(QIcon(":/icons/images/add_to_new.png"));
     this->addAction(action);
     connect(action, &QAction::triggered, this, [songIdVector](){
-        CATEGORY_ListWIDGET->createNewCategoryName(songIdVector);
+        CATEGORY_LISTWIDGET->createNewCategoryName(songIdVector);
     });
     this->addSeparator();
 

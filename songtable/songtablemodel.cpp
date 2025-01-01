@@ -2,7 +2,6 @@
 #include "utils/imageutils.h"
 #include "database/database.h"
 #include "player/player.h"
-#include "playlistwidget.h"
 
 #include <QBrush>
 
@@ -39,15 +38,14 @@ void SongTableModel::batchPlay(bool allSelected)
             songIdVector.append(songId);
         }
     }
+    if (songIdVector.isEmpty())
+        return;
+
     PLAYER->play(songIdVector);
 }
 
-void SongTableModel::removeSelected(const QString &categoryName, PlaylistKind listKind)
+void SongTableModel::removeSelected(const QString &categoryName)
 {
-    if (categoryName.isEmpty()) {
-        return;
-    }
-
     QVector<int> songIdVector;
     int rowCount = this->rowCount();
     for (int i = 0; i < rowCount; ++i) {
@@ -59,24 +57,59 @@ void SongTableModel::removeSelected(const QString &categoryName, PlaylistKind li
     if (songIdVector.isEmpty())
         return;
 
-    switch (listKind) {
+    switch (m_currentKind) {
     case PlaylistKind::Favorite:
         DB->updateFavoriteOnSong(songIdVector, 0);
         break;
     case PlaylistKind::PlayQueue:
-        DB->deleteSongsFromPlaylist(songIdVector);
+        PLAYER->removeSongs(songIdVector);
         break;
     case PlaylistKind::History:
         DB->deleteSongsFromHistory(songIdVector);
         break;
-    case PlaylistKind::LocalAndDownload:
-        DB->deleteSongFromSong(songIdVector);
-        break;
-    default:
+    case PlaylistKind::Custom: {
+        if (categoryName.isEmpty()) {
+            qWarning() << "Category name is empty.";
+            return;
+        }
         DB->deleteSongFromCategory(categoryName, songIdVector);
         break;
     }
+    default:
+        DB->deleteSongFromSong(songIdVector);
+        break;
+    }
+
     select();
+}
+
+void SongTableModel::removeSong(int songId, PlaylistKind listKind, const QString &categoryName)
+{
+    switch (listKind) {
+    case PlaylistKind::Favorite:
+        DB->updateFavoriteOnSong(songId, 0);
+        break;
+    case PlaylistKind::PlayQueue:
+        PLAYER->removeSong(songId);
+        break;
+    case PlaylistKind::History:
+        DB->deleteSongFromHistory(songId);
+        break;
+    case PlaylistKind::Custom: {
+        if (categoryName.isEmpty()) {
+            qWarning() << "Category name is empty.";
+            return;
+        }
+        DB->deleteSongFromCategory(categoryName, songId);
+        break;
+    }
+    default:
+        DB->deleteSongFromSong(songId);
+        break;
+    }
+
+    if (listKind == m_currentKind)
+        select();
 }
 
 QVector<int> SongTableModel::selectedSongIds()
@@ -95,6 +128,57 @@ QVector<int> SongTableModel::selectedSongIds()
 void SongTableModel::resetCheckState()
 {
     checkStateMap.fill(Qt::Unchecked);
+}
+
+void SongTableModel::changeFavorite(int favorite, int songId)
+{
+    int rowCount = this->rowCount();
+    for (int i = 0; i < rowCount; ++i) {
+        int id = QSqlTableModel::data(this->index(i, TableColumns::IdColumn), Qt::DisplayRole).toInt();
+        if (id == songId) {
+            setData(index(i, TableColumns::FavoriteColumn), favorite, Qt::EditRole);
+            break;
+        }
+    }
+}
+
+void SongTableModel::updateTable(const QString &listName, PlaylistKind kind)
+{
+    switch (kind) {
+    case PlaylistKind::Favorite: {
+        m_currentKind = PlaylistKind::Favorite;
+        setFilter("favorite = 1");
+        break;
+    }
+    case PlaylistKind::PlayQueue: {
+        m_currentKind = PlaylistKind::PlayQueue;
+        setFilter("id IN (SELECT song_id FROM playlist)");
+        break;
+    }
+    case PlaylistKind::History: {
+        m_currentKind = PlaylistKind::History;
+        setFilter("id IN (SELECT song_id FROM history)");
+        break;
+    }
+    case PlaylistKind::LocalAndDownload: {
+        m_currentKind = PlaylistKind::LocalAndDownload;
+        setFilter("");
+        break;
+    }
+    case PlaylistKind::Custom: {
+        m_currentKind = PlaylistKind::Custom;
+        setFilter(QString("id IN (SELECT song_id FROM songCategoryRelationship WHERE category_name = '%1')").arg(listName));
+        break;
+    }
+    case PlaylistKind::SearchList: {
+        m_currentKind = PlaylistKind::SearchList;
+        setFilter(QString("LOWER(title) LIKE LOWER('%%1%')"
+                          " OR LOWER(artist) LIKE LOWER('%%1%')"
+                          " OR LOWER(album) LIKE LOWER('%%1%')").arg(listName));
+        break;
+    }
+    }
+    select();
 }
 
 QVariant SongTableModel::data(const QModelIndex &index, int role) const
@@ -182,14 +266,13 @@ bool SongTableModel::setData(const QModelIndex &index, const QVariant &value, in
     }
 
     // 检测是否是 favorite 列，并且 role 是 Qt::EditRole
-    if (column == TableColumns::FavoriteColumn
-        && role == Qt::EditRole
-        && PLAY_LISTWIDGET->currentPlaylistKind() == PlaylistKind::Favorite){
-        // 执行更新操作
-        if (QSqlTableModel::setData(index, value, role)) {
-            select();
-        }
+    if (column == TableColumns::FavoriteColumn && role == Qt::EditRole) {
+        emit favoriteChanged(QSqlTableModel::data(this->index(row, TableColumns::IdColumn), Qt::DisplayRole).toInt(), value.toInt());
+        if (m_currentKind == PlaylistKind::Favorite
+            && QSqlTableModel::setData(index, value, role)){
+        select();
         return false;
+        }
     }
 
     return QSqlTableModel::setData(index, value, role);

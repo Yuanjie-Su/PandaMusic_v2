@@ -28,7 +28,8 @@ enum class PlaylistKind {
     PlayQueue,
     History,
     LocalAndDownload,
-    Custom
+    Custom,
+    SearchList,
 };
 
 #endif // CONSTANTS_H
