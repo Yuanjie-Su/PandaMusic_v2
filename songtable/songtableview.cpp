@@ -4,7 +4,6 @@
 #include "songtablemodel.h"
 #include "mymenu/moremenu.h"
 #include "utils/constants.h"
-#include "playlistwidget.h"
 #include "categorylistwidget.h"
 
 #include <QContextMenuEvent>

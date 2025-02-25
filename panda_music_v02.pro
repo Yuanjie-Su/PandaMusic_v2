@@ -6,6 +6,7 @@ include($$PWD/database/database.pri)
 include($$PWD/mymenu/mymenu.pri)
 include($$PWD/utils/utils.pri)
 include($$PWD/songtable/songtable.pri)
+include($$PWD/network/network.pri)
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

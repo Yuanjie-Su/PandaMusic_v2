@@ -3,6 +3,7 @@
 #include "playlistwidget.h"
 #include "database/database.h"
 #include "utils/imageutils.h"
+#include "utils/constants.h"
 #include "mymenu/basemenu.h"
 
 #include <QFontMetrics>
@@ -20,7 +21,6 @@ CategoryListWidget::CategoryListWidget(QWidget *parent)
     this->setCursor(Qt::PointingHandCursor);
     this->setFocusPolicy(Qt::NoFocus);
     this->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    // 字体看能不能在样式表中实现
     this->setStyleSheet(
         "QListWidget {"
         "background-color:  rgb(240,240,240);"
@@ -90,7 +90,8 @@ void CategoryListWidget::initList()
     QFontMetrics fontMetrics(QFont("Microsoft YaHei", 10));
     const int availableWidth = m_columnCategoryWidgth - 6;
 
-    this->setUpdatesEnabled(false); // 暂时禁用更新提高性能
+    // 暂时禁用更新提高性能
+    this->setUpdatesEnabled(false);
 
     for (const QVariant &categoryData : categoryMapList) {
         QVariantMap categoryMap = categoryData.toMap();
@@ -114,7 +115,7 @@ void CategoryListWidget::createNewCategoryName(int songId)
         m_tempCoverPath = DB->getSongCoverPath(songId);
     }
     if (m_tempCoverPath.isEmpty())
-        m_tempCoverPath = ":/cover/images/panda-listening-music.jpg";
+        m_tempCoverPath = Paths::DefaultCover;
 
     m_isNewNameEditing = true;
     m_editRow = 0;
@@ -134,7 +135,7 @@ void CategoryListWidget::createNewCategoryName(const QVector<int> &songIdVector)
     m_tempSongIdVector = songIdVector;
 
     if (m_tempCoverPath.isEmpty())
-        m_tempCoverPath = ":/cover/images/panda-listening-music.jpg";
+        m_tempCoverPath = Paths::DefaultCover;
 
     m_isNewNameEditing = true;
     m_editRow = 0;
@@ -289,9 +290,9 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
             if (row != m_currentRow) {
                 m_currentRow = row;
 
-                if (PLAY_LISTWIDGET->selectionModel()->hasSelection()) {
-                    PLAY_LISTWIDGET->setCurrentRow(-1);
-                    PLAY_LISTWIDGET->clearSelection();
+                if (LISTWIDGET_MYMUSIC->selectionModel()->hasSelection()) {
+                    LISTWIDGET_MYMUSIC->setCurrentRow(-1);
+                    LISTWIDGET_MYMUSIC->clearSelection();
                 }
 
                 emit listSelected(categoryName);
@@ -309,7 +310,7 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
 
             // 播放
             QAction *action = new QAction("播放");
-            action->setIcon(QIcon(":/icons/images/play_one.png"));
+            action->setIcon(QIcon(Paths::PlayOneIcon));
             categoryMenu->addAction(action);
             if (DB->isCategoryContainSong(categoryName)) {
                 connect(action, &QAction::triggered
@@ -341,7 +342,7 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
 
             // 删除
             action = new QAction("删除");
-            action->setIcon(QIcon(":/icons/images/delete.png"));
+            action->setIcon(QIcon(Paths::DeleteIcon));
             categoryMenu->addAction(action);
             connect(action, &QAction::triggered
                     , this, [this, row, categoryName] () mutable {
@@ -358,7 +359,7 @@ void CategoryListWidget::mousePressEvent(QMouseEvent *event)
                         );
                     SONG_TABLEMODEL->select();
                 } else {
-                    PLAY_LISTWIDGET->setCurrentRow(1);
+                    LISTWIDGET_MYMUSIC->setCurrentRow(1);
                 }
             });
 
@@ -380,9 +381,9 @@ void CategoryListWidget::do_itemClicked(QListWidgetItem *item)
 
     m_currentRow = this->currentRow();
 
-    if (PLAY_LISTWIDGET->selectionModel()->hasSelection()) {
-        PLAY_LISTWIDGET->setCurrentRow(-1);
-        PLAY_LISTWIDGET->clearSelection();
+    if (LISTWIDGET_MYMUSIC->selectionModel()->hasSelection()) {
+        LISTWIDGET_MYMUSIC->setCurrentRow(-1);
+        LISTWIDGET_MYMUSIC->clearSelection();
     }
 
     QString categoryName = this->currentItem()->toolTip();

@@ -3,6 +3,7 @@
 #include "player/player.h"
 #include "database/database.h"
 #include "songtable/songtablemodel.h"
+#include "utils/constants.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -19,7 +20,7 @@ MoreMenu::MoreMenu(QWidget *parent
     bool visible = songId != -1;
     // 播放
     QAction *action = new QAction("播放");
-    action->setIcon(QIcon(":/icons/images/play_one.png"));
+    action->setIcon(QIcon(Paths::PlayOneIcon));
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [songId](){
@@ -31,7 +32,7 @@ MoreMenu::MoreMenu(QWidget *parent
 
     // 下一首播放
     action = new QAction("下一首播放");
-    action->setIcon(QIcon(":/icons/images/play_next.png"));
+    action->setIcon(QIcon(Paths::PlayNextIcon));
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [songId](){
@@ -43,13 +44,13 @@ MoreMenu::MoreMenu(QWidget *parent
 
     // 播放相似单曲
     action = new QAction("播放相似单曲");
-    action->setIcon(QIcon(":/icons/images/play_similar.png"));
+    action->setIcon(QIcon(Paths::PlaySimilarIcon));
     this->addAction(action);
     action->setEnabled(false);
 
     // 播放MV
     action = new QAction("播放MV");
-    action->setIcon(QIcon(":/icons/images/play_mv.png"));
+    action->setIcon(QIcon(Paths::PlayMvIcon));
     this->addAction(action);
     action->setEnabled(false);
 
@@ -57,9 +58,9 @@ MoreMenu::MoreMenu(QWidget *parent
     this->addSeparator();
     action = new QAction("我喜欢");
     if (favorite)
-        action->setIcon(QIcon(":/icons/images/like.png"));
+        action->setIcon(QIcon(Paths::LikeIcon));
     else
-        action->setIcon(QIcon(":/icons/images/unlike.png"));
+        action->setIcon(QIcon(Paths::UnlikeIcon));
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [favorite, songId](){
@@ -73,7 +74,7 @@ MoreMenu::MoreMenu(QWidget *parent
     AddToMenu *addToMenu = new AddToMenu(this, songId);
     // 子菜单标题
     addToMenu->setTitle("添加到");
-    addToMenu->setIcon(QIcon(":/icons/images/add_to_new.png"));
+    addToMenu->setIcon(QIcon(Paths::AddToNewIcon));
     this->addMenu(addToMenu);
     if (!visible) {
         addToMenu->setEnabled(false);
@@ -81,19 +82,19 @@ MoreMenu::MoreMenu(QWidget *parent
 
     // 下载
     action = new QAction("下载");
-    action->setIcon(QIcon(":/icons/images/download.png"));
+    action->setIcon(QIcon(Paths::DownloadIcon));
     this->addAction(action);
     action->setEnabled(false);
 
     // 分享
     action = new QAction("分享");
-    action->setIcon(QIcon(":/icons/images/share.png"));
+    action->setIcon(QIcon(Paths::ShareIcon));
     this->addAction(action);
     action->setEnabled(false);
 
     // 复制歌曲信息
     action = new QAction("复制歌曲信息");
-    action->setIcon(QIcon(":/icons/images/copy.png"));
+    action->setIcon(QIcon(Paths::CopyIcon));
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [songId](){
@@ -111,7 +112,7 @@ MoreMenu::MoreMenu(QWidget *parent
     // 删除
     this->addSeparator();
     action = new QAction("删除");
-    action->setIcon(QIcon(":/icons/images/trash.png"));
+    action->setIcon(QIcon(Paths::DeleteIcon));
     this->addAction(action);
     if (visible) {
         connect(action, &QAction::triggered, this, [songId, listKind, categoryName](){

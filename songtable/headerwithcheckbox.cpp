@@ -1,4 +1,5 @@
 #include "headerwithcheckbox.h"
+#include "utils/constants.h"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -37,13 +38,13 @@ void HeaderWithCheckbox::paintSection(QPainter *painter, const QRect &rect, int 
         QString iconPath;
         switch (m_checkState) {
         case Qt::Unchecked:
-            iconPath = m_pathUncheckedIcon;
+            iconPath = Paths::UncheckedIcon;
             break;
         case Qt::Checked:
-            iconPath = m_pathCheckedIcon;
+            iconPath = Paths::CheckedIcon;
             break;
         case Qt::PartiallyChecked:
-            iconPath = m_pathPartiallyCheckedIcon;
+            iconPath = Paths::PartiallyCheckedIcon;
             break;
         }
         QImageReader reader(iconPath);

@@ -1,10 +1,11 @@
 #include "playlistwidget.h"
 #include "categorylistwidget.h"
 #include "songtable/songtablemodel.h"
+#include "utils/constants.h"
 
-PlayListWidget* PlayListWidget::m_instance = nullptr;
+ListWidgetMyMusic* ListWidgetMyMusic::m_instance = nullptr;
 
-PlayListWidget::PlayListWidget(QWidget *parent)
+ListWidgetMyMusic::ListWidgetMyMusic(QWidget *parent)
     : QListWidget(parent)
 {
     this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -36,9 +37,10 @@ PlayListWidget::PlayListWidget(QWidget *parent)
         );
     this->setIconSize(QSize(20, 20));
 
-    // 设置"喜欢","播放队列","最近播放","本地和下载"
+    // 设置项, "喜欢","播放队列","最近播放","本地和下载"
     QStringList categoryStringList{"喜欢", "播放队列", "最近播放", "本地和下载"};
-    QStringList iconPathList{m_pathUnlikeIcon, m_pathPlaylist, m_pathHistory, m_pathLocalDownload};
+    QStringList iconPathList{Paths::UnlikeIcon, Paths::PlaylistIcon,
+                             Paths::HistoryIcon, Paths::LocalDownloadIcon};
     for (int i = 0; i < 4; ++i) {
         QListWidgetItem *item = new QListWidgetItem(categoryStringList[i]);
         item->setIcon(QIcon(iconPathList[i]));
@@ -46,18 +48,18 @@ PlayListWidget::PlayListWidget(QWidget *parent)
     }
 
     connect(this, &QListWidget::currentRowChanged,
-            this, &PlayListWidget::do_currentRowChanged);
+            this, &ListWidgetMyMusic::do_currentRowChanged);
 }
 
-PlayListWidget* PlayListWidget::instance(QWidget *parent)
+ListWidgetMyMusic* ListWidgetMyMusic::instance(QWidget *parent)
 {
     if (!m_instance) {
-        m_instance = new PlayListWidget(parent);
+        m_instance = new ListWidgetMyMusic(parent);
     }
     return m_instance;
 }
 
-void PlayListWidget::do_currentRowChanged(int row)
+void ListWidgetMyMusic::do_currentRowChanged(int row)
 {
     emit exitBatchProcess();
 

@@ -2,8 +2,13 @@
 #include "player/player.h"
 #include "categorylistwidget.h"
 #include "database/database.h"
+#include "utils/constants.h"
 
-BatchAddToMenu::BatchAddToMenu(QWidget *parent, QVector<int> songIdVector, const QString &sourceCategoryName, PlaylistKind listKind)
+BatchAddToMenu::BatchAddToMenu(QWidget *parent
+                               , QVector<int> songIdVector
+                               , const QString &sourceCategoryName
+                               , PlaylistKind listKind)
+    : BaseMenu(parent)
 {
     if (songIdVector.isEmpty())
         return;
@@ -23,7 +28,7 @@ BatchAddToMenu::BatchAddToMenu(QWidget *parent, QVector<int> songIdVector, const
     // 添加到新歌单
     this->addSeparator();
     action = new QAction("添加到新歌单", this);
-    action->setIcon(QIcon(":/icons/images/add_to_new.png"));
+    action->setIcon(QIcon(Paths::AddToNewIcon));
     this->addAction(action);
     connect(action, &QAction::triggered, this, [songIdVector](){
         CATEGORY_LISTWIDGET->createNewCategoryName(songIdVector);

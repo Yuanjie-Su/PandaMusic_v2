@@ -1,17 +1,39 @@
 #pragma once
 
 #include <QSqlDatabase>
-#include <memory>
+
+/**
+ * @class Database
+ * @brief 数据库管理类，提供数据库连接初始化和基本操作功能。
+ *
+ * 该类使用单例模式，确保全局只有一个数据库连接实例。
+ * 支持多线程环境下的线程安全操作。
+ */
 
 #define DB Database::instance()
 
-class QMutex;
 class Database {
 public:
     Database();
     virtual ~Database();
+
+    /**
+     * @brief 获取单例实例。
+     * @return 返回 Database 的单例实例。
+     */
     static Database *instance();
+
+    /**
+     * @brief 初始化数据库连接。
+     * @param path 数据库文件路径。
+     * @return 初始化成功返回 true，否则返回 false。
+     */
     bool init(const QString &path);
+
+    /**
+     * @brief 获取数据库连接对象。
+     * @return 返回数据库连接对象。
+     */
     QSqlDatabase &db() { return m_db; }
 
     bool removeCategory(const QString &categoryName);
@@ -57,17 +79,13 @@ public:
     QVariantList selectFromPlaylist();
     QVariantList selectFromSongCategory(const QString &name);
 
+    // 导入歌曲
     bool insertSongsIntoSong();
 
     void updateFavoriteOnSong(int songID, int favorite);
     void updateFavoriteOnSong(QVector<int> songIdVector, int favorite);
 
-
 private:
-    QString currentDateTime();
-
-private:
-    QSqlDatabase m_db;
-    std::unique_ptr<QMutex> m_mutex;
-    QString m_name;
+    QSqlDatabase m_db; // 数据库连接对象
+    QString m_name; // 数据库名称(数据库文件绝对路径)
 };

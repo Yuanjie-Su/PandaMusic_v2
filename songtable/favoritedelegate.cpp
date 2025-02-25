@@ -1,4 +1,5 @@
 #include "favoritedelegate.h"
+#include "utils/constants.h"
 
 #include <QPainter>
 #include <QMouseEvent>
@@ -7,10 +8,10 @@ FavoriteDelegate::FavoriteDelegate(QObject *parent)
     : QStyledItemDelegate{parent}
 {
     // 加载图标
-    m_favoritePixmap = QPixmap(":/icons/images/like.png")
+    m_favoritePixmap = QPixmap(Paths::LikeIcon)
                            .scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    m_unfavoritePixmap = QPixmap(":/icons/images/unlike.png")
+    m_unfavoritePixmap = QPixmap(Paths::UnlikeIcon)
                              .scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 

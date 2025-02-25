@@ -3,33 +3,36 @@
 
 #include <QDebug>
 #include <QGlobalStatic>
-#include <QMutex>
-#include <QMutexLocker>
 #include <QSqlDatabase>
-#include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QDir>
 #include <QFileDialog>
 
+// 创建一个全局静态对象，保证全局唯一、线程安全
+// 延迟初始化，程序结束时自动释放
 Q_GLOBAL_STATIC(Database, database)
 
-Database::Database() { m_mutex = std::make_unique<QMutex>(); }
+Database::Database() {}
 
 Database::~Database() {}
 
-Database *Database::instance() { return database; }
+Database *Database::instance() {
+    return database;
+}
 
 bool Database::init(const QString &path) {
-    QMutexLocker locker(m_mutex.get());
+    // 数据库已经建立连接
     if (!m_name.isEmpty()) {
         qWarning() << "database initialized";
         return true;
     }
 
+    // 创建数据库连接
     m_db = QSqlDatabase::addDatabase("QSQLITE");
     m_db.setDatabaseName(path);
     if (m_db.open()) {
+        // 设置为数据库文件的路径，避免重复初始化
         m_name = path;
 
         // 启用外键约束
@@ -37,8 +40,11 @@ bool Database::init(const QString &path) {
         if (!query.exec("PRAGMA foreign_keys = ON;")) {
             qWarning() << "Failed to enable foreign keys:" << query.lastError().text();
         }
+
         return true;
     }
+
+    // 数据库连接失败
     return false;
 }
 
@@ -715,35 +721,39 @@ bool Database::insertSongsIntoSong() {
     QString dlgTitle = "选择音频文件";
     QString filter = "音频文件(*.mp3 *.wav *.wma *.flac);;所有文件(*.*)";
     QStringList fileList = QFileDialog::getOpenFileNames(nullptr, dlgTitle, curPath, filter);
-    if (fileList.isEmpty())
+    if (fileList.isEmpty()) {
+        qDebug() << "No files selected.";
         return false;
+    }
 
+    // 开启事务
     if (!m_db.transaction()) {
         qCritical() << "transaction failed: " << m_db.lastError().text();
         return  false;
     }
 
     QSqlQuery query(m_db);
-    int newRecordCount = 0;
-    for (int i=0; i < fileList.size(); i++)
-    {
-        QString filePath = fileList.at(i);
+    int newRecordCount = 0; // 新插入的记录数
 
-        // 歌曲文件的元信息
+    // 遍历文件列表
+    for (const QString &filePath : fileList) {
+        // 获取歌曲文件的元信息
         QVariantMap map = TagLibHelper::getPropertyList(filePath, TagLibHelper::propertyNames());
         if (map.isEmpty()) {
-            qCritical() << "Failed to get song properties.";
+            qCritical() << "Failed to get song properties for file:" << filePath;
             continue;
         }
 
-        // 歌词文件路径
+        // 获取歌词文件路径
         QFileInfo fileInfo(filePath);
-        QDir dir(fileInfo.absolutePath()); // 获取文件的目录
+        QDir dir(fileInfo.absolutePath());
         QString lyricFile = dir.filePath(fileInfo.baseName() + ".lrc");
         QFileInfo lrcFileInfo(lyricFile);
-        if (!lrcFileInfo.exists())
-            lyricFile = "";
+        if (!lrcFileInfo.exists()) {
+            lyricFile = ""; // 歌词文件不存在, 置为空
+        }
 
+        // 准备SQL语句
         query.prepare(
             "INSERT INTO song (title, artist, cover, album, duration, path, lyric) "
             "VALUES (:title, :artist, :cover, :album, :duration, :path, :lyric)");
@@ -755,26 +765,34 @@ bool Database::insertSongsIntoSong() {
         query.bindValue(":path", filePath);
         query.bindValue(":lyric", lyricFile);
 
+        // 执行插入操作
         if (query.exec()) {
             if (query.numRowsAffected() > 0) {
-                qDebug() << "New record inserted.";
+                qDebug() << "New record inserted for file:" << filePath;
                 ++newRecordCount;
             } else {
-                qDebug() << "Record already exists.";
+                qDebug() << "Record already exists for file:" << filePath;
             }
         } else {
-            qDebug() << "Insert failed:" << query.lastError();
+            qDebug() << "Insert failed for file:" << filePath << ", Error:" << query.lastError();
         }
     }
 
+    // 提交事务
     if (!m_db.commit()) {
         qCritical() << "commit failed: " << m_db.lastError().text();
-        if (!m_db.rollback())
+        if (!m_db.rollback()) {
             qCritical() << "rollback failed: " << m_db.lastError().text();
+        }
         return false;
-    } else if (newRecordCount > 0) {
+    }
+
+    // 返回插入结果
+    if (newRecordCount > 0) {
+        qDebug() << "Successfully inserted" << newRecordCount << "new records.";
         return true;
     } else {
+        qDebug() << "No new records inserted.";
         return false;
     }
 }
@@ -879,8 +897,4 @@ QVariantList Database::selectFavoritedSongs() {
         list.append(map);
     }
     return list;
-}
-
-QString Database::currentDateTime() {
-    return QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
 }

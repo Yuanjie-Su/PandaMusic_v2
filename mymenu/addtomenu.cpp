@@ -2,6 +2,7 @@
 #include "player/player.h"
 #include "database/database.h"
 #include "categorylistwidget.h"
+#include "utils/constants.h"
 
 #include <QFontMetrics>
 
@@ -27,7 +28,7 @@ AddToMenu::AddToMenu(QWidget *parent, int songId)
     // 添加到新歌单
     this->addSeparator();
     action = new QAction("添加到新歌单", this);
-    action->setIcon(QIcon(":/icons/images/add_to_new.png"));
+    action->setIcon(QIcon(Paths::AddToNewIcon));
     this->addAction(action);
     connect(action, &QAction::triggered, this, [songId](){
         CATEGORY_LISTWIDGET->createNewCategoryName(songId);

@@ -1,5 +1,6 @@
 #include "volumecontrolwidget.h"
 #include "ui_volumecontrolwidget.h"
+#include "utils/constants.h"
 
 #include <QGraphicsEffect>
 
@@ -23,9 +24,9 @@ VolumeControlWidget::VolumeControlWidget(QWidget *parent, int volume, bool muted
     ui->verticalSliderVolume->setValue(volume);
     ui->labelVolume->setText(QString::number(volume) + "%");
     if (muted) {
-        ui->btnVolume->setIcon(QIcon(":/icons/images/mute.png"));
+        ui->btnVolume->setIcon(QIcon(Paths::MuteIcon));
     } else {
-        ui->btnVolume->setIcon(QIcon(":/icons/images/volume.png"));
+        ui->btnVolume->setIcon(QIcon(Paths::VolumeIcon));
     }
 }
 
@@ -43,7 +44,7 @@ void VolumeControlWidget::on_verticalSliderVolume_valueChanged(int value)
         if (muted) {
             emit mutedChanged(false);
             QIcon icon;
-            icon.addFile(":/icons/images/volume.png");
+            icon.addFile(Paths::VolumeIcon);
             ui->btnVolume->setIcon(icon);
             muted = false;
         }
@@ -51,7 +52,7 @@ void VolumeControlWidget::on_verticalSliderVolume_valueChanged(int value)
         if (!muted) {
             emit mutedChanged(true);
             QIcon icon;
-            icon.addFile(":/icons/images/mute.png");
+            icon.addFile(Paths::MuteIcon);
             ui->btnVolume->setIcon(icon);
             muted = true;
         }
@@ -65,11 +66,11 @@ void VolumeControlWidget::on_btnVolume_clicked()
 
     if (muted) {
         emit mutedChanged(false);
-        ui->btnVolume->setIcon(QIcon(":/icons/images/volume.png"));
+        ui->btnVolume->setIcon(QIcon(Paths::VolumeIcon));
         muted = false;
     } else {
         emit mutedChanged(true);
-        ui->btnVolume->setIcon(QIcon(":/icons/images/mute.png"));
+        ui->btnVolume->setIcon(QIcon(Paths::MuteIcon));
         muted = true;
     }
 }

@@ -1,5 +1,6 @@
 #include "playmodecontrolwidget.h"
 #include "ui_playmodecontrolwidget.h"
+#include "utils/constants.h"
 
 
 #include <QGraphicsEffect>
@@ -29,22 +30,22 @@ PlayModeControlWidget::PlayModeControlWidget(QWidget *parent,
     QIcon icon;
 
     item = new QListWidgetItem(" 顺序播放");
-    icon.addFile(":/icons/images/sequential.png");
+    icon.addFile(Paths::SequentialIcon);
     item->setIcon(icon);
     ui->listWidget->addItem(item);
 
     item = new QListWidgetItem(" 列表循环");
-    icon.addFile(":/icons/images/loopSequential.png");
+    icon.addFile(Paths::LoopSequentialIcon);
     item->setIcon(icon);
     ui->listWidget->addItem(item);
 
     item = new QListWidgetItem(" 单曲循环");
-    icon.addFile(":/icons/images/loopSingle.png");
+    icon.addFile(Paths::LoopSingleIcon);
     item->setIcon(icon);
     ui->listWidget->addItem(item);
 
     item = new QListWidgetItem(" 随机播放");
-    icon.addFile(":/icons/images/random.png");
+    icon.addFile(Paths::RandomIcon);
     item->setIcon(icon);
     ui->listWidget->addItem(item);
 

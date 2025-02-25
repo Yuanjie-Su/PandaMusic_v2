@@ -8,6 +8,7 @@
 #include "categorylistwidget.h"
 #include "playlistwidget.h"
 #include "utils/imageutils.h"
+#include "utils/constants.h"
 #include "myMenu/moremenu.h"
 #include "myMenu/batchaddtomenu.h"
 #include "trotatedlabel.h"
@@ -24,117 +25,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // 播放列表
-    QVBoxLayout *vLayoutPlaylist = new QVBoxLayout();
-    vLayoutPlaylist->setSpacing(11);
-    ui->labelPandamusic->setPixmap(QPixmap(":/cover/images/pandamusic_label.png")
-                                       .scaledToWidth(120, Qt::SmoothTransformation));
-    vLayoutPlaylist->addSpacing(10);
-    vLayoutPlaylist->addWidget(ui->labelPandamusic);
-    vLayoutPlaylist->addSpacing(20);
-    vLayoutPlaylist->addWidget(ui->labelPlaylist);
-    vLayoutPlaylist->addWidget(PlayListWidget::instance(this));
+    // 初始化布局
+    initLayout();
+    // 初始化当前播放歌曲详情
+    initCurrentSongDetails();
+    // 初始化搜索框
+    initSearchLineEdit();
+    // 初始化"我的音乐"列表
+    initMyMusicList();
+    // 初始化"player"模块
+    initPlayerModule();
 
-    // 自建歌单列表
-    QHBoxLayout *hLayoutCategory = new QHBoxLayout();
-    hLayoutCategory->addWidget(ui->labelCategory);
-    hLayoutCategory->addSpacing(10);
-    hLayoutCategory->addWidget(ui->btnNewCategory);
-    hLayoutCategory->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    hLayoutCategory->setContentsMargins(0, 0, 0, 0);
-
-    vLayoutPlaylist->addLayout(hLayoutCategory);
-    vLayoutPlaylist->addWidget(CategoryListWidget::instance(this), 1);
-    ui->widgetList->setLayout(vLayoutPlaylist);
-
-    // 歌曲具体信息表格
-    ui->frameTable->layout()->addWidget(SongTableView::instance(this));
-    PLAY_LISTWIDGET->setCurrentRow(1);
-
-    // 初始化播放列表
-    PLAYER->initPlaylist(DB->selectSongIdFromPlaylist());
-
-    // 退出批量操作、批量删除不可见
-    ui->btnImport->setVisible(false);
-    ui->btnExitBatch->setVisible(false);
-    ui->btnRemoveBatch->setVisible(false);
-    ui->btnBatchAddTo->setVisible(false);
-    // 当前播放歌曲相关的按钮
-    ui->btnFavoriteOne->setEnabled(false);
-    ui->btnMoreOne->setEnabled(false);
-    ui->btnComent->setEnabled(false);
-
-    // 歌词界面不可见
-    ui->lyricsWidget->setVisible(false);
-
-    // 设置显示歌曲封面的labelCover
-    QIcon btnCoverIcon;
-    btnCoverIcon.addFile(":/icons/images/lyric_hide.png", QSize(), QIcon::Normal, QIcon::On);
-    QPixmap pixmapCover = ImageUtils::getRoundedPixmap(m_pathCover, 56, 56);
-    btnCoverIcon.addPixmap(pixmapCover, QIcon::Active, QIcon::Off);
-    btnCoverIcon.addPixmap(pixmapCover, QIcon::Normal, QIcon::Off);
-    ui->btnCover->setIcon(btnCoverIcon);
-    ui->btnCover->setToolTip("显示歌曲详情页");
-    // 设置歌词界面
-    ui->lyricsWidget->coverDisk()->setCenterPixmap(m_pathCover);
-    ui->lyricsWidget->setLyrics(
-        {
-            {0, ""},
-            {1, ""},
-            {2, "Panda音乐 听我想听"}
-        },
-        QString(),
-        QString()
-        );
-    // 显示当前播放歌曲信息
-    QString htmlString = "<span style='margin:0; font-family:Microsoft YaHei; font-size:13px; color:#111111;'>Panda音乐-</span> "
-                         "<span style='margin:0; font-family:Microsoft YaHei; font-size:11px; color:#505050;'>听我想听</span>";
-    ui->labelTitle->setText(htmlString);
-
-    // 搜索框action
-    QAction *searchAction = new QAction(this);
-    searchAction->setToolTip("搜索");
-    searchAction->setIcon(QIcon(":/icons/images/search.png"));
-    ui->lineEditSearch->addAction(searchAction, QLineEdit::TrailingPosition);
-    ui->lineEditSearch->setPlaceholderText("搜索");
-    ui->lineEditSearch->setFocusPolicy(Qt::ClickFocus);
-    this->setFocusPolicy(Qt::ClickFocus);
-    connect(searchAction, &QAction::triggered, this, [this] {
-        actionSearch(ui->lineEditSearch->text().trimmed());
-    });
-    connect(ui->lineEditSearch, &QLineEdit::returnPressed, this, [this] {
-        actionSearch(ui->lineEditSearch->text().trimmed());
-    });
-
-    connect(ui->btnPrevious, &QPushButton::clicked,
-            PLAYER, &Player::previous);
-    connect(ui->btnNext, &QPushButton::clicked,
-            PLAYER, &Player::next);
-    connect(PLAYER->mediaPlayer(), &QMediaPlayer::durationChanged,
-            this, &MainWindow::do_durationChanged);
-    connect(ui->sliderPosition, &QSlider::valueChanged, this, [this] (int value) {
-        disconnect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
-                   this, &MainWindow::do_positionChanged);
-        updateLabelPosition(value);
-        updateLyrics(value);
-        PLAYER->setPosition(value);
-        connect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
-                this, &MainWindow::do_positionChanged);
-    });
-    connect(PLAYER->mediaPlayer(), &QMediaPlayer::playbackStateChanged,
-            this, &MainWindow::do_playbackStateChanged);
-    connect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
-            this, &MainWindow::do_positionChanged);
-    connect(PLAYER, &Player::songIdChanged,
-            this, &MainWindow::do_songIdChanged);
-    connect(PLAYER, &Player::metaDataChanged,
-            this, &MainWindow::do_metaDataChanged);
     connect(CATEGORY_LISTWIDGET, &CategoryListWidget::listSelected,
             this, &MainWindow::do_listSelected);
-    connect(PLAY_LISTWIDGET, &PlayListWidget::listSelected,
-            this, &MainWindow::do_listSelected);
-    connect(PLAY_LISTWIDGET, &PlayListWidget::exitBatchProcess,
-            this, &MainWindow::do_exitBatchProcess);
     connect(CATEGORY_LISTWIDGET, &CategoryListWidget::exitBatchProcess,
             this, &MainWindow::do_exitBatchProcess);
     connect(SONG_TABLEMODEL, &SongTableModel::favoriteChanged,
@@ -158,15 +61,16 @@ void MainWindow::on_btnPlay_clicked()
 
 void MainWindow::do_playbackStateChanged(QMediaPlayer::PlaybackState state)
 {
+    // 更新播放按钮图标
     QIcon icon;
     if (state == QMediaPlayer::PlayingState) {
-        icon.addFile(m_pathPauseIcon);
+        icon.addFile(Paths::PauseIcon);
         ui->btnPlay->setIcon(icon);
         ui->btnPlay->setToolTip("暂停");
         if (ui->lyricsWidget->isVisible())
             ui->lyricsWidget->coverDisk()->trogglePlay(true);
     } else {
-        icon.addFile(m_pathPlayIcon);
+        icon.addFile(Paths::PlayIcon);
         ui->btnPlay->setIcon(icon);
         ui->btnPlay->setToolTip("播放");
         if (ui->lyricsWidget->isVisible())
@@ -216,7 +120,7 @@ void MainWindow::do_songIdChanged(int songId)
 
     // 设置"喜欢"按钮
     int favoriteLabel = songDetailsMap["favorite"].toInt();
-    QString iconPath = favoriteLabel ? m_pathLikeIcon : m_pathUnlikeIcon;
+    QString iconPath = favoriteLabel ? Paths::LikeIcon : Paths::UnlikeIcon;
     QString tooltip = favoriteLabel ? "取消喜欢" : "喜欢";
     ui->btnFavoriteOne->setIcon(QIcon(iconPath));
     ui->btnFavoriteOne->setToolTip(tooltip);
@@ -243,7 +147,7 @@ void MainWindow::do_metaDataChanged(const QVariantMap &songDetailsMap)
     QImage coverImage = songDetailsMap["coverImage"].value<QImage>();
     QPixmap cover;
     if (coverImage.isNull()) {
-        cover = QPixmap(m_pathCover);
+        cover = QPixmap(Paths::DefaultCover);
         ui->lyricsWidget->coverDisk()->setCenterPixmap(cover);
         cover = ImageUtils::getRoundedPixmap(cover);
     } else {
@@ -283,6 +187,7 @@ void MainWindow::parseLrcFile(const QString &filePath)
 
 void MainWindow::updateLabelPosition(qint64 pos)
 {
+    // 更新当前播放时间显示
     int seconds = pos / 1000;
     if (seconds != m_currentSeconds) {
         m_currentSeconds = seconds;
@@ -296,17 +201,21 @@ void MainWindow::actionSearch(const QString &text)
 {
     if (text.isEmpty())
         return;
+
     do_exitBatchProcess();
+
     if (CATEGORY_LISTWIDGET->selectionModel()->hasSelection()) {
         CATEGORY_LISTWIDGET->m_currentRow = -1;
         CATEGORY_LISTWIDGET->clearSelection();
     }
-    if (PLAY_LISTWIDGET->selectionModel()->hasSelection()) {
-        PLAY_LISTWIDGET->setCurrentRow(-1);
-        PLAY_LISTWIDGET->clearSelection();
+
+    if (LISTWIDGET_MYMUSIC->selectionModel()->hasSelection()) {
+        LISTWIDGET_MYMUSIC->setCurrentRow(-1);
+        LISTWIDGET_MYMUSIC->clearSelection();
     }
 
     SONG_TABLEMODEL->updateTable(text, PlaylistKind::SearchList);
+
     ui->labelListTitle->setText("搜索结果");
 }
 
@@ -340,6 +249,8 @@ void MainWindow::on_btnRemoveBatch_clicked()
 
 void MainWindow::do_listSelected(const QString &listName)
 {
+    // 更新当前播放列表名称
+
     // 最多显示6个字符
     if (listName.size() > 6) {
         QString temp = listName.left(6);
@@ -355,9 +266,9 @@ void MainWindow::do_favoriteChanged(int songId, int favorite)
 {
     if (ui->btnFavoriteOne->property("songId").toInt() == songId) {
         if (favorite) {
-            ui->btnFavoriteOne->setIcon(QIcon(m_pathLikeIcon));
+            ui->btnFavoriteOne->setIcon(QIcon(Paths::LikeIcon));
         } else {
-            ui->btnFavoriteOne->setIcon(QIcon(m_pathUnlikeIcon));
+            ui->btnFavoriteOne->setIcon(QIcon(Paths::UnlikeIcon));
         }
         ui->btnFavoriteOne->setProperty("favorite", favorite);
     }
@@ -386,11 +297,15 @@ void MainWindow::on_btnBatchProcess_clicked()
 
 void MainWindow::on_btnVolume_clicked()
 {
+    // 当前音量值
     float rawVolume = PLAYER->audioOutput()->volume();
     rawVolume = qBound(0.0f, rawVolume, 1.0f); // 限制在合法范围内
-    int volume = qRound(rawVolume * 100.0f);
+    int volume = qRound(rawVolume * 100.0f); // 转换为 0-100 范围的整数
+
+    // 音量控制界面
     VolumeControlWidget *volumeControlWidget =
         new VolumeControlWidget(nullptr, volume, PLAYER->audioOutput()->isMuted());
+
     connect(volumeControlWidget, &VolumeControlWidget::volumeChanged,
             PLAYER, &Player::do_volumeChanged);
     connect(volumeControlWidget, &VolumeControlWidget::mutedChanged,
@@ -398,33 +313,37 @@ void MainWindow::on_btnVolume_clicked()
     connect(volumeControlWidget, &VolumeControlWidget::mutedChanged,
             this, &MainWindow::do_mutedChanged);
 
+    // 设置音量控制界面显示位置
     QPoint globalPos = ui->btnVolume->mapToGlobal(QPoint(0, 0));
     int x = globalPos.x() - (volumeControlWidget->width() - ui->btnVolume->width()) / 2;
     int y = globalPos.y() - volumeControlWidget->height() - 2;
-
     volumeControlWidget->move(x, y);
     volumeControlWidget->show();
 }
 
 void MainWindow::do_mutedChanged(bool muted)
 {
+    // 更新音量按钮图标
     QIcon icon;
     if (muted) {
-        icon.addFile(":/icons/images/mute.png");
+        icon.addFile(Paths::MuteIcon);
         ui->btnVolume->setIcon(icon);
     } else {
-        icon.addFile(":/icons/images/volume.png");
+        icon.addFile(Paths::VolumeIcon);
         ui->btnVolume->setIcon(icon);
     }
 }
 
 void MainWindow::on_btnPlayMode_clicked()
 {
+    // 播放模式控制界面
     PlayModeControlWidget *playModeControlWidget = new PlayModeControlWidget(nullptr, PLAYER->playBackMode());
     connect(playModeControlWidget, &PlayModeControlWidget::playBackModeChanged,
             PLAYER, &Player::do_playModeChanged);
     connect(playModeControlWidget, &PlayModeControlWidget::playBackModeChanged,
             this, &MainWindow::do_playModeChanged);
+
+    // 设置播放模式控制界面显示位置
     QPoint globalPos = ui->btnPlayMode->mapToGlobal(QPoint(0, 0));
     int x = globalPos.x() - (playModeControlWidget->width() - ui->btnPlayMode->width()) / 2;
     int y = globalPos.y() - playModeControlWidget->height() - 2;
@@ -434,22 +353,23 @@ void MainWindow::on_btnPlayMode_clicked()
 
 void MainWindow::do_playModeChanged(Player::PlayBackMode playBackMode)
 {
+    // 更新播放模式按钮图标
     QIcon icon;
     switch (playBackMode) {
     case Player::Sequential: {
-        icon.addFile(":/icons/images/sequential.png");
+        icon.addFile(Paths::SequentialIcon);
         break;
     }
     case Player::LoopSequential: {
-        icon.addFile(":/icons/images/loopSequential.png");
+        icon.addFile(Paths::LoopSequentialIcon);
         break;
     }
     case Player::LoopSingle: {
-        icon.addFile(":/icons/images/loopSingle.png");
+        icon.addFile(Paths::LoopSingleIcon);
         break;
     }
     case Player::Random: {
-        icon.addFile(":/icons/images/random.png");
+        icon.addFile(Paths::RandomIcon);
         break;
     }
     }
@@ -463,14 +383,14 @@ void MainWindow::on_btnNewCategory_clicked()
 
 void MainWindow::on_btnLyric_clicked()
 {
-    if (m_singleLyricWidget) {
+    if (m_singleLyricWidget) { // 关闭单句歌词窗口
         delete m_singleLyricWidget;
         m_singleLyricWidget = nullptr;
         m_lyricMap.clear();
         m_currentLyricKey = -1;
         m_currentLyricEnd = -1;
         return;
-    } else {
+    } else { // 打开单句歌词窗口
         m_singleLyricWidget = new SingleLyricWidget();
 
         // 设置歌词窗口位置到 MainWindow 所在屏幕的底部
@@ -487,6 +407,7 @@ void MainWindow::on_btnLyric_clicked()
         m_singleLyricWidget->setLyricText(m_lyricMap.isEmpty() ? "当前歌曲无歌词文件" : m_lyricMap[m_currentLyricKey]);
 
         m_singleLyricWidget->show();
+
         connect(m_singleLyricWidget, &SingleLyricWidget::widgetClosed, this, [this] () {
             delete m_singleLyricWidget;
             m_singleLyricWidget = nullptr;
@@ -501,15 +422,18 @@ void MainWindow::updateLyrics(qint64 pos)
 
     nextLyricText(pos); // 更新当前歌词位置
     if (m_singleLyricWidget) {
+        // 更新单句歌词显示窗口
         m_singleLyricWidget->setLyricText(m_lyricMap[m_currentLyricKey]);
     }
     if (ui->lyricsWidget->isVisible()) {
+        // 更新歌曲详情界面中的歌词
         ui->lyricsWidget->updateLyrics(m_currentLyricKey);
     }
 }
 
 void MainWindow::nextLyricText(qint64 position)
 {
+    // 更新当前歌词位置
     auto it = m_lyricMap.upperBound(position);
     if (it == m_lyricMap.end()) {
         m_currentLyricEnd = m_duration;
@@ -521,7 +445,7 @@ void MainWindow::nextLyricText(qint64 position)
 
 void MainWindow::on_btnCover_clicked(bool checked)
 {
-    if (checked) {
+    if (checked) { // 显示歌曲详情界面
         ui->widgetTop->setVisible(!checked);
         ui->lyricsWidget->setVisible(checked);
         ui->lyricsWidget->updateLyrics(m_currentLyricKey);
@@ -529,14 +453,14 @@ void MainWindow::on_btnCover_clicked(bool checked)
         ui->lyricsWidget->coverDisk()->setPoleState(isPlaying);
         ui->lyricsWidget->coverDisk()->trogglePlay(isPlaying);
         ui->btnCover->setToolTip("关闭歌曲详情页");
-    } else {
+    } else { // 隐藏歌曲详情界面
         ui->lyricsWidget->setVisible(checked);
         ui->widgetTop->setVisible(!checked);
+        // 停止歌曲详情界面中黑胶唱片的动画
         ui->lyricsWidget->coverDisk()->trogglePlay(false);
         ui->btnCover->setToolTip("显示歌曲详情页");
     }
 }
-
 
 void MainWindow::on_btnImport_clicked()
 {
@@ -544,6 +468,178 @@ void MainWindow::on_btnImport_clicked()
         SONG_TABLEMODEL->select();
 }
 
+void MainWindow::initLayout()
+{
+    // 主界面播放列表布局
+    QVBoxLayout *vLayoutPlaylist = new QVBoxLayout();
+    vLayoutPlaylist->setSpacing(11); // 设置控件间距
+    vLayoutPlaylist->addSpacing(10); // 添加上边距
+    // "Panda音乐" 图标
+    ui->labelPandamusic->setPixmap(
+        QPixmap(":/cover/images/pandamusic_label.png")
+            .scaledToWidth(120, Qt::SmoothTransformation)
+        );
+    vLayoutPlaylist->addWidget(ui->labelPandamusic);
+    vLayoutPlaylist->addSpacing(20);
+    // "我的音乐"标签
+    vLayoutPlaylist->addWidget(ui->labelPlaylist);
+    // "我的音乐"列表
+    vLayoutPlaylist->addWidget(ListWidgetMyMusic::instance(this), 1);
+
+    // "自建歌单"控制按钮布局
+    QHBoxLayout *hLayoutCategory = new QHBoxLayout();
+    // "自建歌单"标签
+    hLayoutCategory->addWidget(ui->labelCategory);
+    hLayoutCategory->addSpacing(10);
+    // 新建歌单按钮
+    hLayoutCategory->addWidget(ui->btnNewCategory);
+    hLayoutCategory->addSpacerItem(
+        new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum)
+        );
+    hLayoutCategory->setContentsMargins(0, 0, 0, 0); // 设置外边距
+    vLayoutPlaylist->addLayout(hLayoutCategory);
+    // "自建歌单"列表
+    vLayoutPlaylist->addWidget(CategoryListWidget::instance(this), 1);
+    ui->widgetList->setLayout(vLayoutPlaylist);
+
+    // 歌曲具体信息表格
+    ui->frameTable->layout()->addWidget(SongTableView::instance(this));
+
+    // 设置部分按钮不可见
+    ui->btnImport->setVisible(false); // 导入歌曲
+    ui->btnExitBatch->setVisible(false); // 退出批量操作
+    ui->btnRemoveBatch->setVisible(false); // 批量移除
+    ui->btnBatchAddTo->setVisible(false); // 批量添加到
+    // 设置当前播放歌曲相关的按钮不可见
+    ui->btnFavoriteOne->setEnabled(false); // 喜欢
+    ui->btnMoreOne->setEnabled(false); // 更多
+    ui->btnComent->setEnabled(false); // 评论
+    // 歌词界面不可见
+    ui->lyricsWidget->setVisible(false);
+}
+
+void MainWindow::initCurrentSongDetails()
+{
+    // 封面按钮图标
+    QIcon btnCoverIcon;
+    // 添加封面按钮不同状态的图标
+    // 正常状态，按钮处于“开启”状态
+    btnCoverIcon.addFile(
+        Paths::LyricHideIcon,
+        QSize(), // 默认大小
+        QIcon::Normal,
+        QIcon::On
+        );
+    // 激活状态，按钮处于“关闭”状态
+    QPixmap pixmapCover = ImageUtils::getRoundedPixmap(
+        Paths::DefaultCover, 56, 56
+        );
+    btnCoverIcon.addPixmap(
+        pixmapCover,
+        QIcon::Active,
+        QIcon::Off
+        );
+    // 正常状态，按钮处于“关闭”状态
+    btnCoverIcon.addPixmap(
+        pixmapCover,
+        QIcon::Normal,
+        QIcon::Off
+        );
+    ui->btnCover->setIcon(btnCoverIcon);
+    ui->btnCover->setToolTip("显示歌曲详情页");
+
+    // 设置"歌名-歌手"标签
+    QString htmlString = "<span style='margin:0; font-family:Microsoft YaHei; font-size:13px; color:#111111;'>Panda音乐-</span> "
+                         "<span style='margin:0; font-family:Microsoft YaHei; font-size:11px; color:#505050;'>听我想听</span>";
+    ui->labelTitle->setText(htmlString);
+
+    // 设置歌曲详情界面
+    // 设置黑胶唱片中心图片
+    ui->lyricsWidget->
+        coverDisk()->
+        setCenterPixmap(Paths::DefaultCover);
+    // 设置歌曲详情界面歌词
+    ui->lyricsWidget->setLyrics(
+        {
+            {0, ""},
+            {1, ""},
+            {2, "Panda音乐 听我想听"}
+        },
+        QString(),
+        QString()
+        );
+}
+
+void MainWindow::initPlayerModule()
+{
+    // 播放器加载"播放队列"歌曲
+    PLAYER->initPlaylist(DB->selectSongIdFromPlaylist());
+
+    // 前一首、播放、下一首按钮
+    connect(ui->btnPrevious, &QPushButton::clicked,
+            PLAYER, &Player::previous);
+    connect(ui->btnNext, &QPushButton::clicked,
+            PLAYER, &Player::next);
+
+    // 时长
+    connect(PLAYER->mediaPlayer(), &QMediaPlayer::durationChanged,
+            this, &MainWindow::do_durationChanged);
+    // 播放进度
+    connect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
+            this, &MainWindow::do_positionChanged);
+    // 播放进度
+    connect(ui->sliderPosition, &QSlider::valueChanged, this, [this] (int value) {
+        disconnect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
+                   this, &MainWindow::do_positionChanged);
+        updateLabelPosition(value);
+        updateLyrics(value);
+        PLAYER->setPosition(value);
+        connect(PLAYER->mediaPlayer(), &QMediaPlayer::positionChanged,
+                this, &MainWindow::do_positionChanged);
+    });
+
+    // 播放状态
+    connect(PLAYER->mediaPlayer(), &QMediaPlayer::playbackStateChanged,
+            this, &MainWindow::do_playbackStateChanged);
+
+    // 当前播放歌曲id发生改变
+    connect(PLAYER, &Player::songIdChanged,
+            this, &MainWindow::do_songIdChanged);
+    // 当前播放歌曲元信息发生改变
+    connect(PLAYER, &Player::metaDataChanged,
+            this, &MainWindow::do_metaDataChanged);
+}
+
+void MainWindow::initMyMusicList()
+{
+    connect(LISTWIDGET_MYMUSIC, &ListWidgetMyMusic::listSelected,
+            this, &MainWindow::do_listSelected);
+    connect(LISTWIDGET_MYMUSIC, &ListWidgetMyMusic::exitBatchProcess,
+            this, &MainWindow::do_exitBatchProcess);
+
+    // "我的音乐"列表当前选中为"播放队列"
+    LISTWIDGET_MYMUSIC->setCurrentRow(1);
+}
+
+void MainWindow::initSearchLineEdit()
+{
+    // 搜索按钮
+    QAction *searchAction = new QAction(this);
+    searchAction->setToolTip("搜索");
+    searchAction->setIcon(QIcon(Paths::SearchIcon));
+    // 将搜索按钮添加到搜索框中
+    ui->lineEditSearch->addAction(searchAction, QLineEdit::TrailingPosition);
+
+    ui->lineEditSearch->setPlaceholderText("搜索");
+    ui->lineEditSearch->setFocusPolicy(Qt::ClickFocus);
+    this->setFocusPolicy(Qt::ClickFocus);
+    connect(searchAction, &QAction::triggered, this, [this] {
+        actionSearch(ui->lineEditSearch->text().trimmed());
+    });
+    connect(ui->lineEditSearch, &QLineEdit::returnPressed, this, [this] {
+        actionSearch(ui->lineEditSearch->text().trimmed());
+    });
+}
 
 void MainWindow::on_btnExitBatch_clicked()
 {
@@ -553,7 +649,6 @@ void MainWindow::on_btnExitBatch_clicked()
     ui->btnBatchAddTo->setVisible(false);
     SONG_TABLEVIEW->exitBatchProcess();
 }
-
 
 void MainWindow::on_btnBatchAddTo_clicked()
 {
@@ -566,4 +661,3 @@ void MainWindow::on_btnBatchAddTo_clicked()
         );
     batchAddToMenu->exec(QCursor::pos());
 }
-

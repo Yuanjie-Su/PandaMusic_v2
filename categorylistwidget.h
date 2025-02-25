@@ -12,13 +12,16 @@ public:
     // 禁止拷贝与赋值
     CategoryListWidget(const CategoryListWidget &) = delete;
     CategoryListWidget& operator=(const CategoryListWidget &) = delete;
+    // 获取单例实例
     static CategoryListWidget* instance(QWidget *parent = nullptr);
-
+    // 创建新的歌单(无选中歌曲或选中一首歌曲)
     void createNewCategoryName(int songId = -1);
+    // 创建新的歌单(选中多首歌曲)
     void createNewCategoryName(const QVector<int> &songIdVector);
+    // 获取当前选中歌单名称
     QString currentCategoryName();
 
-    int m_currentRow = -1; // 上一次选中行
+    int m_currentRow = -1; // 当前行
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

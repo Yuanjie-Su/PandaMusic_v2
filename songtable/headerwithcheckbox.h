@@ -23,9 +23,6 @@ signals:
 private:
     QVector<QString> m_columnNames;
     bool m_checkStateEdit = false;
-    QString m_pathCheckedIcon = ":/icons/images/checked.png";
-    QString m_pathUncheckedIcon = ":/icons/images/unchecked.png";
-    QString m_pathPartiallyCheckedIcon = ":/icons/images/partially_checked.png";
     int m_checkColumn = 1;
     Qt::CheckState m_checkState;
 };

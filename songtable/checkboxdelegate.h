@@ -14,8 +14,6 @@ protected:
     bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
 private:
-    QString m_pathCheckedIcon = ":/icons/images/checked.png";
-    QString m_pathUncheckedIcon = ":/icons/images/unchecked.png";
     bool m_checkStateEdit = false;
     QPixmap m_checkedPixmap;
     QPixmap m_uncheckedPixmap;

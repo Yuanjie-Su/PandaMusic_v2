@@ -1,4 +1,5 @@
 #include "checkboxdelegate.h"
+#include "utils/constants.h"
 
 #include <QPainter>
 #include <QMouseEvent>
@@ -12,7 +13,7 @@ void CheckBoxDelegate::setCheckStateEdit(bool edit)
     {
         m_checkStateEdit = true;
 
-        QImageReader reader(m_pathUncheckedIcon);
+        QImageReader reader(Paths::UncheckedIcon);
         reader.setScaledSize(QSize(32, 32));
         QImage image = reader.read();
         if (image.isNull()) {
@@ -20,7 +21,7 @@ void CheckBoxDelegate::setCheckStateEdit(bool edit)
         }
         m_uncheckedPixmap = QPixmap::fromImage(image.scaled(13, 13, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-        reader.setFileName(m_pathCheckedIcon);
+        reader.setFileName(Paths::CheckedIcon);
         image = reader.read();
         if (image.isNull()) {
             return;
